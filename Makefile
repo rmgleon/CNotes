@@ -1,5 +1,5 @@
 # Install
-BIN = zahnrad
+BIN = CNotes
 
 # Flags
 CFLAGS += -std=c11 -Wall -Wextra -pedantic -Wno-unused-function -O2

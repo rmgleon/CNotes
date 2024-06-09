@@ -39,8 +39,7 @@ struct XWindow {
     Atom wm_delete_window;
 };
 
-static void die(const char *fmt, ...)
-{
+static void die(const char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
@@ -49,15 +48,13 @@ static void die(const char *fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-static long timestamp(void)
-{
+static long timestamp(void){
     struct timeval tv;
     if (gettimeofday(&tv, NULL) < 0) return 0;
     return (long)((long)tv.tv_sec * 1000 + (long)tv.tv_usec/1000);
 }
 
-static void sleep_for(long t)
-{
+static void sleep_for(long t){
     struct timespec req;
     const time_t sec = (int)(t/1000);
     const long ms = t - (sec * 1000);
@@ -66,8 +63,7 @@ static void sleep_for(long t)
     while(-1 == nanosleep(&req, &req));
 }
 
-int main(void)
-{
+int main(void){
     long dt;
     long started;
     int running = 1;
