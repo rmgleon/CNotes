@@ -163,15 +163,21 @@ int main(void){
         nk_input_end(ctx);
 
         /* GUI */
-        if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 70),
+        if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 700),
             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
             NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
         {
             nk_layout_row_dynamic(ctx, 400, 1);
             nk_edit_string(ctx, NK_EDIT_BOX, text, &text_len, sizeof(text), nk_filter_default);
         }
+        nk_layout_row_static(ctx, 30, 80, 2);
+        if (nk_button_label(ctx, "Button")){
+            /* event handling */
+        }
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
+
+
 
         /* Draw */
         XClearWindow(xw.dpy, xw.win);
