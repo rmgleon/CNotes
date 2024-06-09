@@ -18,7 +18,6 @@
 #define NK_XLIB_IMPLEMENTATION
 #include "nuklear/nuklear.h"
 #include "nuklear/nuklear_xlib.h"
-#include "test.h"
 
 #define DTIME           20
 #define WINDOW_WIDTH    800
