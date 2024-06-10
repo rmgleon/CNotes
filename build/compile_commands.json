@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/build",
-  "command": "/usr/bin/clang  -I\"/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/src\" -I\"/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/nuklear\" -Os -DNDEBUG -std=gnu11 -o CMakeFiles/CNotes.dir/src/app.c.o -c \"/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/src/app.c\"",
-  "file": "/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/src/app.c"
-}
-]
