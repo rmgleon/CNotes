@@ -22,19 +22,11 @@
 
 // Hecho por nosotros
 #include "../src/file_actions.h"
+//#include "../src/style.c"
 
 #define DTIME           20
 #define WINDOW_WIDTH    800
 #define WINDOW_HEIGHT   600
-
-// Variables globales
-
-char text[1024 * 16] = {0}; /* Buffer for text input */
-char title[100] = {0}; // Titulo
-int text_len = 0;
-int title_len = 0;
-char title_save_buf[100];
-
 
 typedef struct XWindow XWindow;
 struct XWindow {
@@ -55,12 +47,10 @@ struct XWindow {
     Atom utf8_string; // Atom para UTF8_STRING
 };
 
-void cleanup(XWindow *xw);
-
 void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la parte arriba
       
     // Iniciar la ventana del menú en la parte superior de la ventana
-    if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 40), 0)) {
+    if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 35), 0)) {
         // Iniciar la barra de menú
         nk_menubar_begin(ctx);
         {
@@ -103,7 +93,52 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
 
                 if (nk_menu_item_label(ctx, "hash search", NK_TEXT_LEFT)) {
                 // Acción para "Search"
+
+               
                 }
+
+                // Terminar el menú "Search"
+                nk_menu_end(ctx);
+            }
+
+              
+            // Comenzar el menú "THEMEs"
+            if (nk_menu_begin_label(ctx, "themes", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+                // Definir una fila dinámica de 25 de altura con 1 elemento por fila
+                nk_layout_row_dynamic(ctx, 25, 1);
+
+                // Definir elementos del menú
+                if (nk_menu_item_label(ctx, " THEME_BLACK", NK_TEXT_LEFT)) {
+                    
+                     set_style(ctx, THEME_RED);
+                }
+
+                if (nk_menu_item_label(ctx, " THEME_WHITE", NK_TEXT_LEFT)) {
+                    
+                     set_style(ctx, THEME_WHITE);
+                }
+
+                if (nk_menu_item_label(ctx, " THEME_RED", NK_TEXT_LEFT)) {
+                    
+                     set_style(ctx, THEME_RED);
+                }
+          
+               if (nk_menu_item_label(ctx, " THEME_BLUE", NK_TEXT_LEFT)) {
+
+                     set_style(ctx, THEME_BLUE);
+                }
+
+                 if (nk_menu_item_label(ctx, " THEME_DARK ", NK_TEXT_LEFT)) {
+
+                     set_style(ctx, THEME_DARK);
+                }
+
+                 if (nk_menu_item_label(ctx, " THEME_DRACULA", NK_TEXT_LEFT)) {
+
+                     set_style(ctx, THEME_DRACULA);
+                }
+
+                
 
                 // Terminar el menú "Search"
                 nk_menu_end(ctx);
@@ -140,28 +175,7 @@ static void sleep_for(long t){
     while(-1 == nanosleep(&req, &req));
 }
 
-// Función para copiar texto al portapapeles
-void copy_to_clipboard(XWindow *xw, const char *text) {
-    XSetSelectionOwner(xw->dpy, xw->clipboard, xw->win, CurrentTime);
-    if (XGetSelectionOwner(xw->dpy, xw->clipboard) != xw->win) {
-        fprintf(stderr, "Failed to set clipboard owner\n");
-        return;
-    }
-    XChangeProperty(xw->dpy, xw->win, xw->clipboard, xw->utf8_string, 8,
-                    PropModeReplace, (unsigned char*)text, strlen(text));
-}
 
-// Función para pegar texto del portapapeles
-char* paste_from_clipboard(XWindow *xw) {
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems, bytes_after;
-    unsigned char *data = NULL;
-    XConvertSelection(xw->dpy, xw->clipboard, xw->utf8_string, xw->clipboard, xw->win, CurrentTime);
-    XGetWindowProperty(xw->dpy, xw->win, xw->clipboard, 0, LONG_MAX / 4, False, AnyPropertyType,
-                       &actual_type, &actual_format, &nitems, &bytes_after, &data);
-    return (char*)data;
-}
 
 int main(void){
     long dt;
@@ -169,6 +183,11 @@ int main(void){
     int running = 1;
     XWindow xw;
     struct nk_context *ctx;
+    char text[1024 * 16] = {0}; /* Buffer for text input */
+    char title[100] = {0}; // Titulo
+    int text_len = 0;
+    int title_len = 0;
+    char title_save_buf[100];
 
     /* X11 */
     memset(&xw, 0, sizeof xw);
@@ -205,7 +224,7 @@ int main(void){
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
     char title_placeholder[]={"Titulo:"};
     strcpy(title, title_placeholder);
-    title_len=sizeof(title_placeholder-1);
+    title_len=sizeof(title_placeholder);
 
 
 
@@ -224,30 +243,26 @@ int main(void){
                 KeySym keysym = XLookupKeysym(&evt.xkey, 0);
                 if ((evt.xkey.state & ControlMask) && keysym == XK_c) {
                     // Copiar texto al portapapeles
-                    copy_to_clipboard(&xw, text);
+                   
                 } else if ((evt.xkey.state & ControlMask) && keysym == XK_v) {
-                    // Pegar texto del portapapeles
-                    char *clipboard_text = paste_from_clipboard(&xw);
-                    if (clipboard_text) {
-                        strncat(text, clipboard_text, sizeof(text) - text_len - 1);
-                        text_len = strlen(text);
-                        XFree(clipboard_text);
+                   
                     }
                 }
             }
             nk_xlib_handle_event(xw.dpy, xw.screen, xw.win, &evt);
-        }
+        
         nk_input_end(ctx);
 
         /* GUI */
-        layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
-       // layout2(ctx);
 
-        if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 700),
-            NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
-            NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
-            NK_WINDOW_TITLE)){    
-                nk_layout_row_dynamic(ctx, 25, 1);
+        if (nk_begin(ctx, "backgraund", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ),0)){
+
+        }nk_end(ctx);
+
+        layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
+
+       /* if (nk_begin(ctx,"Sidebar", sidebarRect, 1),NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE ){
+            nk_layout_row_dynamic(ctx, 25, 1);
                 nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
 
                 nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
@@ -255,6 +270,25 @@ int main(void){
                 nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
                 nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
 
+                nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
+            
+        }
+            nk_end(ctx);
+*/
+
+        if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){    
+                
+                nk_layout_row_dynamic(ctx, 25, 1);
+                nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+
+               // if (nk_group_begin(ctx, "scroll", NK_WINDOW_BORDER)) {
+                nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
+                //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
+                
+                nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
+                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
+              //  }
+              //  nk_group_end(ctx)
                 nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
 
 
