@@ -5,7 +5,8 @@ Estructuras de datos
 - Mapa Hash para búsquedas por título
 - Grafos para relaciones entre notas
 - Árbol de Huffman (si es posible) para comprimir las notas
-Funcionalidad
+
+Funcionalidad:
 - Interfaz gráfica con Nuklear (https://github.com/Immediate-Mode-UI/Nuklear/)                     (En camino)
 - Abrir, guardar, editar, y eliminar archivos de texto                                             (En camino, guardar y editar funciona)
 - Búsqueda por título utilizando el mapa de hash                                                   (No implementado)
