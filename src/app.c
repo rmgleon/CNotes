@@ -103,6 +103,7 @@ int main(void){
     char title[100] = {0}; // Titulo
     int text_len = 0;
     int title_len = 0;
+    char title_save_buf[100];
 
     /* X11 */
     memset(&xw, 0, sizeof xw);
@@ -137,6 +138,10 @@ int main(void){
     /* GUI */
     xw.font = nk_xfont_create(xw.dpy, "fixed");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
+    char title_placeholder[]={"Titulo:"};
+    strcpy(title, title_placeholder);
+    title_len=sizeof(title_placeholder-1);
+
 
     while (running)
     {
@@ -174,14 +179,13 @@ int main(void){
             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
             NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
             NK_WINDOW_TITLE)){    
-                
                 nk_layout_row_dynamic(ctx, 25, 1);
                 nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
 
                 nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
                 //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
                 nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
-                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE, text, &text_len, sizeof(text), nk_filter_default);
+                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
 
                 nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
 
@@ -203,7 +207,8 @@ int main(void){
        
         nk_layout_row_static(ctx, 30, 80, 2);
         if (nk_button_label(ctx, "Button")){
-            save_text(text, title);
+            strcpy(title_save_buf, title);
+            save_text(text, title_save_buf);
         }
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
