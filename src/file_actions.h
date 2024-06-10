@@ -8,21 +8,13 @@
 #define MAX_TITLE_LENGTH 105
 
 /* Function to save text to a file */
-void save_text(char *text) {
+void save_text(char *text, char* title) {
     system("mkdir notes");
-    char *title = (char *)malloc(sizeof(char) * MAX_TITLE_LENGTH);
     if (title == NULL) {
-        printf("Memory allocation failed\n");
+        printf("No title, won't save\n");
         return;
     }
     char actual;
-    int i = 0;
-    while (i < MAX_TITLE_LENGTH - 1 && (actual = text[i]) != '\n' && actual != '\0') {
-        title[i] = actual;
-        i++;
-    }
-    title[i] = '\0';  // Null-terminate the title
-
     if(title[0]== '\0' || title[0]== '\n'){
         printf("Archivo vacio, no se creo");
         return;
@@ -45,8 +37,6 @@ void save_text(char *text) {
     } else {
         printf("Failed to open file for writing\n");
     }
-
-    free(title);  // Free the allocated memory
 }
 
 /* Function to load text from a file */

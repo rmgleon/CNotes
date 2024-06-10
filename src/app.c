@@ -100,7 +100,9 @@ int main(void){
     XWindow xw;
     struct nk_context *ctx;
     char text[1024 * 16] = {0}; /* Buffer for text input */
+    char title[100] = {0}; // Titulo
     int text_len = 0;
+    int title_len = 0;
 
     /* X11 */
     memset(&xw, 0, sizeof xw);
@@ -166,17 +168,31 @@ int main(void){
         nk_input_end(ctx);
 
         /* GUI */
+
+        
         if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 700),
             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
             NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
             NK_WINDOW_TITLE)){    
                 nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the text editor
+                nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
                 nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE, text, &text_len, sizeof(text), nk_filter_default);
         }
-        nk_layout_row_static(ctx, 30, 80, 2);
+        //nk_layout_row_static(ctx, 30, 80, 2);
         if (nk_button_label(ctx, "Button")){
-            save_text(text);
+            save_text(text, title);
         }
+        //nk_layout_row_dynamic(ctx, 100, 1);
+        if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
+                    int i = 0;
+                    char buffer[64];
+                    nk_layout_row_dynamic(ctx, 25, 1);
+                    for (i = 0; i < 64; ++i) {
+                        sprintf(buffer, "%08d", ((((i%7)*10)^32))+(64+(i%2)*2));
+                        nk_button_label(ctx, buffer);
+                    }
+                    nk_group_end(ctx);
+                }
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
 
