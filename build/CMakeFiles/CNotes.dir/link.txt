@@ -1,0 +1,1 @@
+/usr/bin/clang -Os -DNDEBUG CMakeFiles/CNotes.dir/src/app.c.o -o CNotes  /usr/lib/x86_64-linux-gnu/libSM.so /usr/lib/x86_64-linux-gnu/libICE.so /usr/lib/x86_64-linux-gnu/libX11.so 

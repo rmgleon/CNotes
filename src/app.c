@@ -46,6 +46,64 @@ struct XWindow {
     Atom utf8_string; // Atom para UTF8_STRING
 };
 
+void layout(struct nk_context *ctx, int windowWidth) {
+    // Iniciar la ventana del menú en la parte superior de la ventana
+    if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 40), 0)) {
+        // Iniciar la barra de menú
+        nk_menubar_begin(ctx);
+        {
+            // Definir una fila estática de 30 de altura, con elementos de 40 de ancho y 5 de espacio
+            nk_layout_row_static(ctx, 30, 40, 5);
+
+            // Comenzar el menú "File"
+            if (nk_menu_begin_label(ctx, "File", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+                // Definir una fila dinámica de 25 de altura con 1 elemento por fila
+                nk_layout_row_dynamic(ctx, 25, 1);
+
+                // Definir elementos del menú
+                if (nk_menu_item_label(ctx, "New", NK_TEXT_LEFT)) {
+                    // Acción para "New"
+                }
+                if (nk_menu_item_label(ctx, "Open", NK_TEXT_LEFT)) {
+                    // Acción para "Open"
+                }
+                if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {
+                    // Acción para "Save"
+                }
+                if (nk_menu_item_label(ctx, "Exit", NK_TEXT_LEFT)) {
+                    // Acción para "Exit"
+                    exit(0);
+                }
+                // Terminar el menú "File"
+                nk_menu_end(ctx);
+            }
+            
+            // Comenzar el menú "Search"
+            if (nk_menu_begin_label(ctx, "Search", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+                // Definir una fila dinámica de 25 de altura con 1 elemento por fila
+                nk_layout_row_dynamic(ctx, 25, 1);
+
+                // Definir elementos del menú
+                if (nk_menu_item_label(ctx, "Search", NK_TEXT_LEFT)) {
+                    // Acción para "Search"
+                }
+
+                if (nk_menu_item_label(ctx, "hash search", NK_TEXT_LEFT)) {
+                // Acción para "Search"
+                }
+
+                // Terminar el menú "Search"
+                nk_menu_end(ctx);
+            }
+        }
+        // Terminar la barra de menú
+        nk_menubar_end(ctx);
+    }
+    // Terminar la ventana del menú
+    nk_end(ctx);
+}
+
+
 static void die(const char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
@@ -138,6 +196,8 @@ int main(void){
     xw.font = nk_xfont_create(xw.dpy, "fixed");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
 
+
+
     while (running)
     {
         /* Input */
@@ -168,8 +228,9 @@ int main(void){
         nk_input_end(ctx);
 
         /* GUI */
+        layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
+       // layout2(ctx);
 
-        
         if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 700),
             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
             NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
@@ -208,6 +269,7 @@ int main(void){
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
 
+       
 
 
         /* Draw */

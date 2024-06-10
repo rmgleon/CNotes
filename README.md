@@ -1,6 +1,3 @@
-Integrantes:
-Magno León Rossi, Nicolas Julian Antunes y Kim Taeeon
-
 Estructuras de datos
 - Mapa Hash para búsquedas por título
 - Grafos para relaciones entre notas

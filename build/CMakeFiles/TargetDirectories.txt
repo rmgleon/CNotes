@@ -1,0 +1,3 @@
+/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/build/CMakeFiles/CNotes.dir
+/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/build/CMakeFiles/edit_cache.dir
+/home/thinkpadl15/OneDrive/coding c/Cnote/CNotes/build/CMakeFiles/rebuild_cache.dir
