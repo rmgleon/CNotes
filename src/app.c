@@ -20,6 +20,9 @@
 #include "../nuklear/nuklear.h"
 #include "../nuklear/nuklear_xlib.h"
 
+// Hecho por nosotros
+#include "../src/file_actions.h"
+
 #define DTIME           20
 #define WINDOW_WIDTH    800
 #define WINDOW_HEIGHT   600
@@ -164,15 +167,15 @@ int main(void){
 
         /* GUI */
         if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 700),
-            NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE |
-            NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
-        {
-            nk_layout_row_dynamic(ctx, 400, 1);
-            nk_edit_string(ctx, NK_EDIT_BOX, text, &text_len, sizeof(text), nk_filter_default);
+            NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
+            NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
+            NK_WINDOW_TITLE)){    
+                nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the text editor
+                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE, text, &text_len, sizeof(text), nk_filter_default);
         }
         nk_layout_row_static(ctx, 30, 80, 2);
         if (nk_button_label(ctx, "Button")){
-            /* event handling */
+            save_text(text);
         }
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
