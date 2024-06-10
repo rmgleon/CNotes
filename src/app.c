@@ -27,6 +27,15 @@
 #define WINDOW_WIDTH    800
 #define WINDOW_HEIGHT   600
 
+// Variables globales
+
+char text[1024 * 16] = {0}; /* Buffer for text input */
+char title[100] = {0}; // Titulo
+int text_len = 0;
+int title_len = 0;
+char title_save_buf[100];
+
+
 typedef struct XWindow XWindow;
 struct XWindow {
     Display *dpy;
@@ -45,6 +54,8 @@ struct XWindow {
     Atom targets;   // Atom para los objetivos del portapapeles
     Atom utf8_string; // Atom para UTF8_STRING
 };
+
+void cleanup(XWindow *xw);
 
 void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la parte arriba
       
@@ -68,8 +79,9 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
                 if (nk_menu_item_label(ctx, "Open", NK_TEXT_LEFT)) {
                     // Acción para "Open"
                 }
-                if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {
-                    // Acción para "Save"
+                if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {       
+                    strcpy(title_save_buf, title);
+                    save_text(text, title_save_buf);
                 }
                 if (nk_menu_item_label(ctx, "Exit", NK_TEXT_LEFT)) {
                     // Acción para "Exit"
@@ -157,11 +169,6 @@ int main(void){
     int running = 1;
     XWindow xw;
     struct nk_context *ctx;
-    char text[1024 * 16] = {0}; /* Buffer for text input */
-    char title[100] = {0}; // Titulo
-    int text_len = 0;
-    int title_len = 0;
-    char title_save_buf[100];
 
     /* X11 */
     memset(&xw, 0, sizeof xw);
@@ -211,7 +218,7 @@ int main(void){
         nk_input_begin(ctx);
         while (XPending(xw.dpy)) {
             XNextEvent(xw.dpy, &evt);
-            if (evt.type == ClientMessage) goto cleanup;
+            if (evt.type == ClientMessage) cleanup(&xw);
             if (XFilterEvent(&evt, xw.win)) continue;
             if (evt.type == KeyPress) {
                 KeySym keysym = XLookupKeysym(&evt.xkey, 0);
@@ -288,12 +295,12 @@ int main(void){
             sleep_for(DTIME - dt);
     }
 
-cleanup:
-    nk_xfont_del(xw.dpy, xw.font);
+}
+void cleanup(XWindow *xw){
+    nk_xfont_del((*xw).dpy, (*xw).font);
     nk_xlib_shutdown();
-    XUnmapWindow(xw.dpy, xw.win);
-    XFreeColormap(xw.dpy, xw.cmap);
-    XDestroyWindow(xw.dpy, xw.win);
-    XCloseDisplay(xw.dpy);
-    return 0;
+    XUnmapWindow((*xw).dpy, (*xw).win);
+    XFreeColormap((*xw).dpy, (*xw).cmap);
+    XDestroyWindow((*xw).dpy, (*xw).win);
+    XCloseDisplay((*xw).dpy);
 }
