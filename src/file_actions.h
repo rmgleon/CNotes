@@ -14,7 +14,6 @@ void save_text(char *text, char* title) {
         printf("No title, won't save\n");
         return;
     }
-    char actual;
     if(title[0]== '\0' || title[0]== '\n'){
         printf("Archivo vacio, no se creo");
         return;

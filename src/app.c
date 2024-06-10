@@ -174,25 +174,37 @@ int main(void){
             NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
             NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
             NK_WINDOW_TITLE)){    
-                nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the text editor
+                
+                nk_layout_row_dynamic(ctx, 400, 1);
                 nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+
+                nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
+                //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
+                nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
                 nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE, text, &text_len, sizeof(text), nk_filter_default);
-        }
-        //nk_layout_row_static(ctx, 30, 80, 2);
-        if (nk_button_label(ctx, "Button")){
-            save_text(text, title);
-        }
-        //nk_layout_row_dynamic(ctx, 100, 1);
-        if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
+
+                nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
+
+
+                if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
                     int i = 0;
                     char buffer[64];
-                    nk_layout_row_dynamic(ctx, 25, 1);
+                    nk_layout_row_dynamic(ctx, 25, 2);
                     for (i = 0; i < 64; ++i) {
-                        sprintf(buffer, "%08d", ((((i%7)*10)^32))+(64+(i%2)*2));
+                        sprintf(buffer, "%08d", ((((i % 7) * 10) ^ 32)) + (64 + (i % 2) * 2));
                         nk_button_label(ctx, buffer);
                     }
                     nk_group_end(ctx);
                 }
+                nk_layout_row_end(ctx);
+
+        }
+       
+       
+        nk_layout_row_static(ctx, 30, 80, 2);
+        if (nk_button_label(ctx, "Button")){
+            save_text(text, title);
+        }
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
 
