@@ -175,7 +175,7 @@ int main(void){
             NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
             NK_WINDOW_TITLE)){    
                 
-                nk_layout_row_dynamic(ctx, 400, 1);
+                nk_layout_row_dynamic(ctx, 25, 1);
                 nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
 
                 nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
