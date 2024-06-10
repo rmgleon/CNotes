@@ -46,7 +46,8 @@ struct XWindow {
     Atom utf8_string; // Atom para UTF8_STRING
 };
 
-void layout(struct nk_context *ctx, int windowWidth) {
+void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la parte arriba
+      
     // Iniciar la ventana del menú en la parte superior de la ventana
     if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 40), 0)) {
         // Iniciar la barra de menú
@@ -102,7 +103,6 @@ void layout(struct nk_context *ctx, int windowWidth) {
     // Terminar la ventana del menú
     nk_end(ctx);
 }
-
 
 static void die(const char *fmt, ...){
     va_list ap;
