@@ -9,7 +9,7 @@
 
 /* Function to save text to a file */
 void save_text(char *text, char* title) {
-    system("mkdir notes");
+    
     if (title == NULL) {
         printf("No title, won't save\n");
         return;

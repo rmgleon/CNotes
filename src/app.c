@@ -164,6 +164,7 @@ char* paste_from_clipboard(XWindow *xw) {
 }
 
 int main(void){
+    system("mkdir notes");
     long dt;
     long started;
     int running = 1;
