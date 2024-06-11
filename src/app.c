@@ -66,6 +66,30 @@ void cleanup(XWindow *xw){
     XCloseDisplay((*xw).dpy);
 }
 
+static void die(const char *fmt, ...){
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    fputs("\n", stderr);
+    exit(EXIT_FAILURE);
+}
+
+static long timestamp(void){
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL) < 0) return 0;
+    return (long)((long)tv.tv_sec * 1000 + (long)tv.tv_usec/1000);
+}
+
+static void sleep_for(long t){
+    struct timespec req;
+    const time_t sec = (int)(t/1000);
+    const long ms = t - (sec * 1000);
+    req.tv_sec = sec;
+    req.tv_nsec = ms * 1000000L;
+    while(-1 == nanosleep(&req, &req));
+}
+
 // style table
 enum theme {THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK, THEME_DRACULA};
 
@@ -197,13 +221,8 @@ static void set_style(struct nk_context *ctx, enum theme theme)
         struct nk_color currentline = nk_rgba(68, 71, 90, 255);
         struct nk_color foreground = nk_rgba(248, 248, 242, 255);
         struct nk_color comment = nk_rgba(98, 114, 164, 255);
-        /* struct nk_color cyan = nk_rgba(139, 233, 253, 255); */
-        /* struct nk_color green = nk_rgba(80, 250, 123, 255); */
-        /* struct nk_color orange = nk_rgba(255, 184, 108, 255); */
         struct nk_color pink = nk_rgba(255, 121, 198, 255);
         struct nk_color purple = nk_rgba(189, 147, 249, 255);
-        /* struct nk_color red = nk_rgba(255, 85, 85, 255); */
-        /* struct nk_color yellow = nk_rgba(241, 250, 140, 255); */
         table[NK_COLOR_TEXT] = foreground;
         table[NK_COLOR_WINDOW] = background;
         table[NK_COLOR_HEADER] = currentline;
@@ -239,7 +258,73 @@ static void set_style(struct nk_context *ctx, enum theme theme)
 }
 // inicio de gui
 
-void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la parte arriba
+// ventana de texto e titulo
+void Text_title(struct nk_context *ctx){
+
+    if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH-(WINDOW_WIDTH*30/100), WINDOW_HEIGHT - 35), NK_WINDOW_BORDER
+    | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE)){    
+                
+        nk_layout_row_dynamic(ctx, 25, 1);
+        nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+
+        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - 35, 1); // Begin a new row with dynamic width
+        //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
+                
+        nk_layout_row_push(ctx, 0); // Push 70% of the space for the text editor
+        nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
+        
+
+        nk_layout_row_end(ctx);
+
+    }
+       
+    nk_layout_row_static(ctx, 30, 80, 2);
+    if (nk_button_label(ctx, "Button")){
+        strcpy(title_save_buf, title);
+        save_text(text, title_save_buf);
+    }
+ //   if (nk_window_is_hidden(ctx, "Text Editor")){ 
+  //      break; se deberia implementar en while
+    nk_end(ctx);
+    
+}
+// Ventana de archivo
+void Archive(struct nk_context *ctx){
+
+     if (nk_begin(ctx, "Archive", nk_rect(WINDOW_WIDTH-(WINDOW_WIDTH*30/100), 35, WINDOW_WIDTH-(WINDOW_WIDTH*70/100), WINDOW_HEIGHT - 35),
+        NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |NK_WINDOW_TITLE)){    
+                
+        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - 50, 2); // ventana dianmica , el 2 representa los modos , puede ser 1 o 2 o3 o4
+        nk_layout_row_push(ctx,0); // para ajustado de tamaño 
+
+        if (nk_group_begin(ctx, "Archives", NK_WINDOW_BORDER)) {
+
+            int i = 0;
+            char buffer[64];
+
+            nk_layout_row_dynamic(ctx, 0, 2);
+
+            for (i = 0; i < 3; ++i) {
+
+                sprintf(buffer, "%s", "asdasd.txt");
+
+                if(nk_button_label(ctx, buffer)){
+
+                    load_text(buffer);
+                }
+
+            }nk_group_end(ctx);
+
+        }nk_layout_row_end(ctx);
+   //     if (nk_window_is_hidden(ctx, "Text Editor")){ 
+  //      break;  deberia implemntar en while
+    } nk_end(ctx);
+
+    
+}
+
+// barra de menu en la parte arriba
+void layout(struct nk_context *ctx, int windowWidth) { 
       
     // Iniciar la ventana del menú en la parte superior de la ventana
     if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 35), 0)) {
@@ -247,12 +332,12 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
         nk_menubar_begin(ctx);
         {
             // Definir una fila estática de 30 de altura, con elementos de 40 de ancho y 5 de espacio
-            nk_layout_row_static(ctx, 30, 40, 5);
+            nk_layout_row_static(ctx, 25, 45, 5);
 
             // Comenzar el menú "File"
             if (nk_menu_begin_label(ctx, "File", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
-                nk_layout_row_dynamic(ctx, 25, 1);
+                nk_layout_row_dynamic(ctx, 20, 1);
 
                 // Definir elementos del menú
                 if (nk_menu_item_label(ctx, "New", NK_TEXT_LEFT)) {
@@ -274,9 +359,9 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
             }
             
             // Comenzar el menú "Search"
-            if (nk_menu_begin_label(ctx, "Search", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+            if (nk_menu_begin_label(ctx, "Search  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
-                nk_layout_row_dynamic(ctx, 25, 1);
+                nk_layout_row_dynamic(ctx, 20, 1);
 
                 // Definir elementos del menú
                 if (nk_menu_item_label(ctx, "Search", NK_TEXT_LEFT)) {
@@ -295,9 +380,9 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
 
               
             // Comenzar el menú "THEMEs"
-            if (nk_menu_begin_label(ctx, "themes", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+            if (nk_menu_begin_label(ctx, "themes  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
-                nk_layout_row_dynamic(ctx, 25, 1);
+                nk_layout_row_dynamic(ctx, 20, 1);
 
                 // Definir elementos del menú
                 if (nk_menu_item_label(ctx, " THEME_BLACK", NK_TEXT_LEFT)) {
@@ -330,9 +415,27 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
                      set_style(ctx, THEME_DRACULA);
                 }
 
-                
+                // Terminar el menú "THEMES"
+                nk_menu_end(ctx);
+            }
 
-                // Terminar el menú "Search"
+            // Comenzar el menú "Herramientas"
+            if (nk_menu_begin_label(ctx, "Herramientas  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+                // Definir una fila dinámica de 25 de altura con 1 elemento por fila
+                nk_layout_row_dynamic(ctx, 20, 1);
+
+                // Definir elementos del menú
+                if (nk_menu_item_label(ctx, "Text Editor", NK_TEXT_LEFT)) {
+
+                    Text_title(ctx); // llama funcion de espacio de escritura de texto y titulo
+
+                }
+                if (nk_menu_item_label(ctx, "Archive windows", NK_TEXT_LEFT)) {
+
+                    Archive(ctx); // llama a la funcion de ventana visualizador de archivos txt
+                    
+                }
+                // Terminar el menú "Herramientas"
                 nk_menu_end(ctx);
             }
         }
@@ -405,31 +508,16 @@ void GUI(struct nk_context *ctx){
 
 // fin de gui
 
-static void die(const char *fmt, ...){
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    va_end(ap);
-    fputs("\n", stderr);
-    exit(EXIT_FAILURE);
+// gui main me encantaria llamarle renegator3000
+void GUI(struct nk_context *ctx){
+
+    layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
+    Text_title(ctx); // llama funcion de espacio de escritura de texto y titulo
+    Archive(ctx); // llama a la funcion de ventana visualizador de archivos txt
+
 }
 
-static long timestamp(void){
-    struct timeval tv;
-    if (gettimeofday(&tv, NULL) < 0) return 0;
-    return (long)((long)tv.tv_sec * 1000 + (long)tv.tv_usec/1000);
-}
-
-static void sleep_for(long t){
-    struct timespec req;
-    const time_t sec = (int)(t/1000);
-    const long ms = t - (sec * 1000);
-    req.tv_sec = sec;
-    req.tv_nsec = ms * 1000000L;
-    while(-1 == nanosleep(&req, &req));
-}
-
-
+// fin de gui
 
 int main(void){
     long dt;
@@ -519,4 +607,11 @@ int main(void){
     }
 
 }
-
+void cleanup(XWindow *xw){
+    nk_xfont_del((*xw).dpy, (*xw).font);
+    nk_xlib_shutdown();
+    XUnmapWindow((*xw).dpy, (*xw).win);
+    XFreeColormap((*xw).dpy, (*xw).cmap);
+    XDestroyWindow((*xw).dpy, (*xw).win);
+    XCloseDisplay((*xw).dpy);
+}
