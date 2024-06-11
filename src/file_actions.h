@@ -19,7 +19,7 @@ void save_text(char *text, char* title) {
         return;
     }
 
-    char actual=title[0];
+    //char actual=title[0];
 
 
     // Reemplaza los espacios por guiones bajos
