@@ -22,10 +22,11 @@
 
 // Hecho por nosotros
 #include "../src/file_actions.h"
+//#include "../src/style.c"
 
 #define DTIME           20
-#define WINDOW_WIDTH    800
-#define WINDOW_HEIGHT   600
+#define WINDOW_WIDTH    1248
+#define WINDOW_HEIGHT   640
 
 // Variables globales
 
@@ -34,6 +35,7 @@ char title[100] = {0}; // Titulo
 int text_len = 0;
 int title_len = 0;
 char title_save_buf[100];
+
 
 
 typedef struct XWindow XWindow;
@@ -55,12 +57,192 @@ struct XWindow {
     Atom utf8_string; // Atom para UTF8_STRING
 };
 
-void cleanup(XWindow *xw);
+void cleanup(XWindow *xw){
+    nk_xfont_del((*xw).dpy, (*xw).font);
+    nk_xlib_shutdown();
+    XUnmapWindow((*xw).dpy, (*xw).win);
+    XFreeColormap((*xw).dpy, (*xw).cmap);
+    XDestroyWindow((*xw).dpy, (*xw).win);
+    XCloseDisplay((*xw).dpy);
+}
+
+// style table
+enum theme {THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK, THEME_DRACULA};
+
+static void set_style(struct nk_context *ctx, enum theme theme)
+{
+    struct nk_color table[NK_COLOR_COUNT];
+    if (theme == THEME_WHITE) {
+        table[NK_COLOR_TEXT] = nk_rgba(70, 70, 70, 255);
+        table[NK_COLOR_WINDOW] = nk_rgba(175, 175, 175, 255);
+        table[NK_COLOR_HEADER] = nk_rgba(175, 175, 175, 255);
+        table[NK_COLOR_BORDER] = nk_rgba(0, 0, 0, 255);
+        table[NK_COLOR_BUTTON] = nk_rgba(185, 185, 185, 255);
+        table[NK_COLOR_BUTTON_HOVER] = nk_rgba(170, 170, 170, 255);
+        table[NK_COLOR_BUTTON_ACTIVE] = nk_rgba(160, 160, 160, 255);
+        table[NK_COLOR_TOGGLE] = nk_rgba(150, 150, 150, 255);
+        table[NK_COLOR_TOGGLE_HOVER] = nk_rgba(120, 120, 120, 255);
+        table[NK_COLOR_TOGGLE_CURSOR] = nk_rgba(175, 175, 175, 255);
+        table[NK_COLOR_SELECT] = nk_rgba(190, 190, 190, 255);
+        table[NK_COLOR_SELECT_ACTIVE] = nk_rgba(175, 175, 175, 255);
+        table[NK_COLOR_SLIDER] = nk_rgba(190, 190, 190, 255);
+        table[NK_COLOR_SLIDER_CURSOR] = nk_rgba(80, 80, 80, 255);
+        table[NK_COLOR_SLIDER_CURSOR_HOVER] = nk_rgba(70, 70, 70, 255);
+        table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = nk_rgba(60, 60, 60, 255);
+        table[NK_COLOR_PROPERTY] = nk_rgba(175, 175, 175, 255);
+        table[NK_COLOR_EDIT] = nk_rgba(150, 150, 150, 255);
+        table[NK_COLOR_EDIT_CURSOR] = nk_rgba(0, 0, 0, 255);
+        table[NK_COLOR_COMBO] = nk_rgba(175, 175, 175, 255);
+        table[NK_COLOR_CHART] = nk_rgba(160, 160, 160, 255);
+        table[NK_COLOR_CHART_COLOR] = nk_rgba(45, 45, 45, 255);
+        table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = nk_rgba( 255, 0, 0, 255);
+        table[NK_COLOR_SCROLLBAR] = nk_rgba(180, 180, 180, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR] = nk_rgba(140, 140, 140, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = nk_rgba(150, 150, 150, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = nk_rgba(160, 160, 160, 255);
+        table[NK_COLOR_TAB_HEADER] = nk_rgba(180, 180, 180, 255);
+        nk_style_from_table(ctx, table);
+    } else if (theme == THEME_RED) {
+        table[NK_COLOR_TEXT] = nk_rgba(190, 190, 190, 255);
+        table[NK_COLOR_WINDOW] = nk_rgba(30, 33, 40, 215);
+        table[NK_COLOR_HEADER] = nk_rgba(181, 45, 69, 220);
+        table[NK_COLOR_BORDER] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_BUTTON] = nk_rgba(181, 45, 69, 255);
+        table[NK_COLOR_BUTTON_HOVER] = nk_rgba(190, 50, 70, 255);
+        table[NK_COLOR_BUTTON_ACTIVE] = nk_rgba(195, 55, 75, 255);
+        table[NK_COLOR_TOGGLE] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_TOGGLE_HOVER] = nk_rgba(45, 60, 60, 255);
+        table[NK_COLOR_TOGGLE_CURSOR] = nk_rgba(181, 45, 69, 255);
+        table[NK_COLOR_SELECT] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_SELECT_ACTIVE] = nk_rgba(181, 45, 69, 255);
+        table[NK_COLOR_SLIDER] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_SLIDER_CURSOR] = nk_rgba(181, 45, 69, 255);
+        table[NK_COLOR_SLIDER_CURSOR_HOVER] = nk_rgba(186, 50, 74, 255);
+        table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = nk_rgba(191, 55, 79, 255);
+        table[NK_COLOR_PROPERTY] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_EDIT] = nk_rgba(51, 55, 67, 225);
+        table[NK_COLOR_EDIT_CURSOR] = nk_rgba(190, 190, 190, 255);
+        table[NK_COLOR_COMBO] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_CHART] = nk_rgba(51, 55, 67, 255);
+        table[NK_COLOR_CHART_COLOR] = nk_rgba(170, 40, 60, 255);
+        table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = nk_rgba( 255, 0, 0, 255);
+        table[NK_COLOR_SCROLLBAR] = nk_rgba(30, 33, 40, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR] = nk_rgba(64, 84, 95, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = nk_rgba(70, 90, 100, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = nk_rgba(75, 95, 105, 255);
+        table[NK_COLOR_TAB_HEADER] = nk_rgba(181, 45, 69, 220);
+        nk_style_from_table(ctx, table);
+    } else if (theme == THEME_BLUE) {
+        table[NK_COLOR_TEXT] = nk_rgba(20, 20, 20, 255);
+        table[NK_COLOR_WINDOW] = nk_rgba(202, 212, 214, 215);
+        table[NK_COLOR_HEADER] = nk_rgba(137, 182, 224, 220);
+        table[NK_COLOR_BORDER] = nk_rgba(140, 159, 173, 255);
+        table[NK_COLOR_BUTTON] = nk_rgba(137, 182, 224, 255);
+        table[NK_COLOR_BUTTON_HOVER] = nk_rgba(142, 187, 229, 255);
+        table[NK_COLOR_BUTTON_ACTIVE] = nk_rgba(147, 192, 234, 255);
+        table[NK_COLOR_TOGGLE] = nk_rgba(177, 210, 210, 255);
+        table[NK_COLOR_TOGGLE_HOVER] = nk_rgba(182, 215, 215, 255);
+        table[NK_COLOR_TOGGLE_CURSOR] = nk_rgba(137, 182, 224, 255);
+        table[NK_COLOR_SELECT] = nk_rgba(177, 210, 210, 255);
+        table[NK_COLOR_SELECT_ACTIVE] = nk_rgba(137, 182, 224, 255);
+        table[NK_COLOR_SLIDER] = nk_rgba(177, 210, 210, 255);
+        table[NK_COLOR_SLIDER_CURSOR] = nk_rgba(137, 182, 224, 245);
+        table[NK_COLOR_SLIDER_CURSOR_HOVER] = nk_rgba(142, 188, 229, 255);
+        table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = nk_rgba(147, 193, 234, 255);
+        table[NK_COLOR_PROPERTY] = nk_rgba(210, 210, 210, 255);
+        table[NK_COLOR_EDIT] = nk_rgba(210, 210, 210, 225);
+        table[NK_COLOR_EDIT_CURSOR] = nk_rgba(20, 20, 20, 255);
+        table[NK_COLOR_COMBO] = nk_rgba(210, 210, 210, 255);
+        table[NK_COLOR_CHART] = nk_rgba(210, 210, 210, 255);
+        table[NK_COLOR_CHART_COLOR] = nk_rgba(137, 182, 224, 255);
+        table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = nk_rgba( 255, 0, 0, 255);
+        table[NK_COLOR_SCROLLBAR] = nk_rgba(190, 200, 200, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR] = nk_rgba(64, 84, 95, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = nk_rgba(70, 90, 100, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = nk_rgba(75, 95, 105, 255);
+        table[NK_COLOR_TAB_HEADER] = nk_rgba(156, 193, 220, 255);
+        nk_style_from_table(ctx, table);
+    } else if (theme == THEME_DARK) {
+        table[NK_COLOR_TEXT] = nk_rgba(210, 210, 210, 255);
+        table[NK_COLOR_WINDOW] = nk_rgba(57, 67, 71, 215);
+        table[NK_COLOR_HEADER] = nk_rgba(51, 51, 56, 220);
+        table[NK_COLOR_BORDER] = nk_rgba(46, 46, 46, 255);
+        table[NK_COLOR_BUTTON] = nk_rgba(48, 83, 111, 255);
+        table[NK_COLOR_BUTTON_HOVER] = nk_rgba(58, 93, 121, 255);
+        table[NK_COLOR_BUTTON_ACTIVE] = nk_rgba(63, 98, 126, 255);
+        table[NK_COLOR_TOGGLE] = nk_rgba(50, 58, 61, 255);
+        table[NK_COLOR_TOGGLE_HOVER] = nk_rgba(45, 53, 56, 255);
+        table[NK_COLOR_TOGGLE_CURSOR] = nk_rgba(48, 83, 111, 255);
+        table[NK_COLOR_SELECT] = nk_rgba(57, 67, 61, 255);
+        table[NK_COLOR_SELECT_ACTIVE] = nk_rgba(48, 83, 111, 255);
+        table[NK_COLOR_SLIDER] = nk_rgba(50, 58, 61, 255);
+        table[NK_COLOR_SLIDER_CURSOR] = nk_rgba(48, 83, 111, 245);
+        table[NK_COLOR_SLIDER_CURSOR_HOVER] = nk_rgba(53, 88, 116, 255);
+        table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = nk_rgba(58, 93, 121, 255);
+        table[NK_COLOR_PROPERTY] = nk_rgba(50, 58, 61, 255);
+        table[NK_COLOR_EDIT] = nk_rgba(50, 58, 61, 225);
+        table[NK_COLOR_EDIT_CURSOR] = nk_rgba(210, 210, 210, 255);
+        table[NK_COLOR_COMBO] = nk_rgba(50, 58, 61, 255);
+        table[NK_COLOR_CHART] = nk_rgba(50, 58, 61, 255);
+        table[NK_COLOR_CHART_COLOR] = nk_rgba(48, 83, 111, 255);
+        table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = nk_rgba(255, 0, 0, 255);
+        table[NK_COLOR_SCROLLBAR] = nk_rgba(50, 58, 61, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR] = nk_rgba(48, 83, 111, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = nk_rgba(53, 88, 116, 255);
+        table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = nk_rgba(58, 93, 121, 255);
+        table[NK_COLOR_TAB_HEADER] = nk_rgba(48, 83, 111, 255);
+        nk_style_from_table(ctx, table);
+    } else if (theme == THEME_DRACULA) {
+        struct nk_color background = nk_rgba(40, 42, 54, 255);
+        struct nk_color currentline = nk_rgba(68, 71, 90, 255);
+        struct nk_color foreground = nk_rgba(248, 248, 242, 255);
+        struct nk_color comment = nk_rgba(98, 114, 164, 255);
+        /* struct nk_color cyan = nk_rgba(139, 233, 253, 255); */
+        /* struct nk_color green = nk_rgba(80, 250, 123, 255); */
+        /* struct nk_color orange = nk_rgba(255, 184, 108, 255); */
+        struct nk_color pink = nk_rgba(255, 121, 198, 255);
+        struct nk_color purple = nk_rgba(189, 147, 249, 255);
+        /* struct nk_color red = nk_rgba(255, 85, 85, 255); */
+        /* struct nk_color yellow = nk_rgba(241, 250, 140, 255); */
+        table[NK_COLOR_TEXT] = foreground;
+        table[NK_COLOR_WINDOW] = background;
+        table[NK_COLOR_HEADER] = currentline;
+        table[NK_COLOR_BORDER] = currentline;
+        table[NK_COLOR_BUTTON] = currentline;
+        table[NK_COLOR_BUTTON_HOVER] = comment;
+        table[NK_COLOR_BUTTON_ACTIVE] = purple;
+        table[NK_COLOR_TOGGLE] = currentline;
+        table[NK_COLOR_TOGGLE_HOVER] = comment;
+        table[NK_COLOR_TOGGLE_CURSOR] = pink;
+        table[NK_COLOR_SELECT] = currentline;
+        table[NK_COLOR_SELECT_ACTIVE] = comment;
+        table[NK_COLOR_SLIDER] = background;
+        table[NK_COLOR_SLIDER_CURSOR] = currentline;
+        table[NK_COLOR_SLIDER_CURSOR_HOVER] = comment;
+        table[NK_COLOR_SLIDER_CURSOR_ACTIVE] = comment;
+        table[NK_COLOR_PROPERTY] = currentline;
+        table[NK_COLOR_EDIT] = currentline;
+        table[NK_COLOR_EDIT_CURSOR] = foreground;
+        table[NK_COLOR_COMBO] = currentline;
+        table[NK_COLOR_CHART] = currentline;
+        table[NK_COLOR_CHART_COLOR] = comment;
+        table[NK_COLOR_CHART_COLOR_HIGHLIGHT] = purple;
+        table[NK_COLOR_SCROLLBAR] = background;
+        table[NK_COLOR_SCROLLBAR_CURSOR] = currentline;
+        table[NK_COLOR_SCROLLBAR_CURSOR_HOVER] = comment;
+        table[NK_COLOR_SCROLLBAR_CURSOR_ACTIVE] = purple;
+        table[NK_COLOR_TAB_HEADER] = currentline;
+        nk_style_from_table(ctx, table);
+    } else {
+        nk_style_default(ctx);
+    }
+}
+// inicio de gui
 
 void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la parte arriba
       
     // Iniciar la ventana del menú en la parte superior de la ventana
-    if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 40), 0)) {
+    if (nk_begin(ctx, "Menu", nk_rect(0, 0, windowWidth, 35), 0)) {
         // Iniciar la barra de menú
         nk_menubar_begin(ctx);
         {
@@ -103,7 +285,52 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
 
                 if (nk_menu_item_label(ctx, "hash search", NK_TEXT_LEFT)) {
                 // Acción para "Search"
+
+               
                 }
+
+                // Terminar el menú "Search"
+                nk_menu_end(ctx);
+            }
+
+              
+            // Comenzar el menú "THEMEs"
+            if (nk_menu_begin_label(ctx, "themes", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+                // Definir una fila dinámica de 25 de altura con 1 elemento por fila
+                nk_layout_row_dynamic(ctx, 25, 1);
+
+                // Definir elementos del menú
+                if (nk_menu_item_label(ctx, " THEME_BLACK", NK_TEXT_LEFT)) {
+                    
+                     set_style(ctx, THEME_RED);
+                }
+
+                if (nk_menu_item_label(ctx, " THEME_WHITE", NK_TEXT_LEFT)) {
+                    
+                     set_style(ctx, THEME_WHITE);
+                }
+
+                if (nk_menu_item_label(ctx, " THEME_RED", NK_TEXT_LEFT)) {
+                    
+                     set_style(ctx, THEME_RED);
+                }
+          
+               if (nk_menu_item_label(ctx, " THEME_BLUE", NK_TEXT_LEFT)) {
+
+                     set_style(ctx, THEME_BLUE);
+                }
+
+                 if (nk_menu_item_label(ctx, " THEME_DARK ", NK_TEXT_LEFT)) {
+
+                     set_style(ctx, THEME_DARK);
+                }
+
+                 if (nk_menu_item_label(ctx, " THEME_DRACULA", NK_TEXT_LEFT)) {
+
+                     set_style(ctx, THEME_DRACULA);
+                }
+
+                
 
                 // Terminar el menú "Search"
                 nk_menu_end(ctx);
@@ -115,6 +342,68 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
     // Terminar la ventana del menú
     nk_end(ctx);
 }
+
+void Text_title(struct nk_context *ctx){
+
+    if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){    
+                
+        nk_layout_row_dynamic(ctx, 25, 1);
+        nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+
+        nk_layout_row_begin(ctx, NK_DYNAMIC, 350, 2); // Begin a new row with dynamic width
+        //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
+                
+        nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
+        nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
+        
+
+        nk_layout_row_end(ctx);
+
+    }
+       
+    nk_layout_row_static(ctx, 30, 80, 2);
+    if (nk_button_label(ctx, "Button")){
+        strcpy(title_save_buf, title);
+        save_text(text, title_save_buf);
+    }
+
+    nk_end(ctx);
+        
+}
+
+void searcher(struct nk_context *ctx){
+
+    // nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
+    if (nk_begin(ctx, "grup", nk_rect(400, 45,NK_DYNAMIC,NK_DYNAMIC ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){
+        int i = 0;
+        char buffer[64];
+        nk_layout_row_dynamic(ctx, 25, 2);
+
+        for (i = 0; i < 3; ++i) {
+
+            sprintf(buffer, "%s", "asdasd.txt");
+
+            if(nk_button_label(ctx, buffer)){
+
+              load_text(buffer);
+            }
+        }
+    }
+    nk_end(ctx);
+}
+
+
+
+// gui main me encantaria llamarle renegator3000
+void GUI(struct nk_context *ctx){
+
+    layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
+    Text_title(ctx);
+    searcher(ctx);
+
+}
+
+// fin de gui
 
 static void die(const char *fmt, ...){
     va_list ap;
@@ -140,28 +429,7 @@ static void sleep_for(long t){
     while(-1 == nanosleep(&req, &req));
 }
 
-// Función para copiar texto al portapapeles
-void copy_to_clipboard(XWindow *xw, const char *text) {
-    XSetSelectionOwner(xw->dpy, xw->clipboard, xw->win, CurrentTime);
-    if (XGetSelectionOwner(xw->dpy, xw->clipboard) != xw->win) {
-        fprintf(stderr, "Failed to set clipboard owner\n");
-        return;
-    }
-    XChangeProperty(xw->dpy, xw->win, xw->clipboard, xw->utf8_string, 8,
-                    PropModeReplace, (unsigned char*)text, strlen(text));
-}
 
-// Función para pegar texto del portapapeles
-char* paste_from_clipboard(XWindow *xw) {
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems, bytes_after;
-    unsigned char *data = NULL;
-    XConvertSelection(xw->dpy, xw->clipboard, xw->utf8_string, xw->clipboard, xw->win, CurrentTime);
-    XGetWindowProperty(xw->dpy, xw->win, xw->clipboard, 0, LONG_MAX / 4, False, AnyPropertyType,
-                       &actual_type, &actual_format, &nitems, &bytes_after, &data);
-    return (char*)data;
-}
 
 int main(void){
     system("mkdir notes");
@@ -170,6 +438,11 @@ int main(void){
     int running = 1;
     XWindow xw;
     struct nk_context *ctx;
+    char text[1024 * 16] = {0}; /* Buffer for text input */
+    char title[100] = {0}; // Titulo
+    int text_len = 0;
+    int title_len = 0;
+    char title_save_buf[100];
 
     /* X11 */
     memset(&xw, 0, sizeof xw);
@@ -206,10 +479,7 @@ int main(void){
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
     char title_placeholder[]={"Titulo:"};
     strcpy(title, title_placeholder);
-    title_len=sizeof(title_placeholder-1);
-
-
-
+    title_len=sizeof(title_placeholder);
 
     while (running)
     {
@@ -225,65 +495,18 @@ int main(void){
                 KeySym keysym = XLookupKeysym(&evt.xkey, 0);
                 if ((evt.xkey.state & ControlMask) && keysym == XK_c) {
                     // Copiar texto al portapapeles
-                    copy_to_clipboard(&xw, text);
+                   
                 } else if ((evt.xkey.state & ControlMask) && keysym == XK_v) {
-                    // Pegar texto del portapapeles
-                    char *clipboard_text = paste_from_clipboard(&xw);
-                    if (clipboard_text) {
-                        strncat(text, clipboard_text, sizeof(text) - text_len - 1);
-                        text_len = strlen(text);
-                        XFree(clipboard_text);
+                   
                     }
                 }
             }
             nk_xlib_handle_event(xw.dpy, xw.screen, xw.win, &evt);
-        }
+        
         nk_input_end(ctx);
 
         /* GUI */
-        layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
-       // layout2(ctx);
-
-        if (nk_begin(ctx, "Text Editor", nk_rect(50, 50, 700, 700),
-            NK_WINDOW_BORDER | NK_WINDOW_MOVABLE |
-            NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
-            NK_WINDOW_TITLE)){    
-                nk_layout_row_dynamic(ctx, 25, 1);
-                nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
-
-                nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
-                //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
-                nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
-                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
-
-                nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
-
-
-                if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
-                    int i = 0;
-                    char buffer[64];
-                    nk_layout_row_dynamic(ctx, 25, 2);
-                    for (i = 0; i < 64; ++i) {
-                        sprintf(buffer, "%08d", ((((i % 7) * 10) ^ 32)) + (64 + (i % 2) * 2));
-                        nk_button_label(ctx, buffer);
-                    }
-                    nk_group_end(ctx);
-                }
-                nk_layout_row_end(ctx);
-
-        }
-       
-       
-        nk_layout_row_static(ctx, 30, 80, 2);
-        if (nk_button_label(ctx, "Button")){
-            strcpy(title_save_buf, title);
-            save_text(text, title_save_buf);
-        }
-        nk_end(ctx);
-        if (nk_window_is_hidden(ctx, "Text Editor")) break;
-
-       
-
+        GUI(ctx);
 
         /* Draw */
         XClearWindow(xw.dpy, xw.win);
@@ -297,11 +520,4 @@ int main(void){
     }
 
 }
-void cleanup(XWindow *xw){
-    nk_xfont_del((*xw).dpy, (*xw).font);
-    nk_xlib_shutdown();
-    XUnmapWindow((*xw).dpy, (*xw).win);
-    XFreeColormap((*xw).dpy, (*xw).cmap);
-    XDestroyWindow((*xw).dpy, (*xw).win);
-    XCloseDisplay((*xw).dpy);
-}
+
