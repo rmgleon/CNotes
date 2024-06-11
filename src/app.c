@@ -25,8 +25,8 @@
 //#include "../src/style.c"
 
 #define DTIME           20
-#define WINDOW_WIDTH    1200
-#define WINDOW_HEIGHT   980
+#define WINDOW_WIDTH    1248
+#define WINDOW_HEIGHT   640
 
 // Variables globales
 
@@ -57,12 +57,19 @@ struct XWindow {
     Atom utf8_string; // Atom para UTF8_STRING
 };
 
-void cleanup(XWindow *xw);
+void cleanup(XWindow *xw){
+    nk_xfont_del((*xw).dpy, (*xw).font);
+    nk_xlib_shutdown();
+    XUnmapWindow((*xw).dpy, (*xw).win);
+    XFreeColormap((*xw).dpy, (*xw).cmap);
+    XDestroyWindow((*xw).dpy, (*xw).win);
+    XCloseDisplay((*xw).dpy);
+}
+
 // style table
 enum theme {THEME_BLACK, THEME_WHITE, THEME_RED, THEME_BLUE, THEME_DARK, THEME_DRACULA};
 
-static void
-set_style(struct nk_context *ctx, enum theme theme)
+static void set_style(struct nk_context *ctx, enum theme theme)
 {
     struct nk_color table[NK_COLOR_COUNT];
     if (theme == THEME_WHITE) {
@@ -230,10 +237,7 @@ set_style(struct nk_context *ctx, enum theme theme)
         nk_style_default(ctx);
     }
 }
-
-
-
-
+// inicio de gui
 
 void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la parte arriba
       
@@ -339,6 +343,68 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
     nk_end(ctx);
 }
 
+void Text_title(struct nk_context *ctx){
+
+    if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){    
+                
+        nk_layout_row_dynamic(ctx, 25, 1);
+        nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+
+        nk_layout_row_begin(ctx, NK_DYNAMIC, 350, 2); // Begin a new row with dynamic width
+        //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
+                
+        nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
+        nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
+        
+
+        nk_layout_row_end(ctx);
+
+    }
+       
+    nk_layout_row_static(ctx, 30, 80, 2);
+    if (nk_button_label(ctx, "Button")){
+        strcpy(title_save_buf, title);
+        save_text(text, title_save_buf);
+    }
+
+    nk_end(ctx);
+        
+}
+
+void searcher(struct nk_context *ctx){
+
+    // nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
+    if (nk_begin(ctx, "grup", nk_rect(400, 45,NK_DYNAMIC,NK_DYNAMIC ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){
+        int i = 0;
+        char buffer[64];
+        nk_layout_row_dynamic(ctx, 25, 2);
+
+        for (i = 0; i < 3; ++i) {
+
+            sprintf(buffer, "%s", "asdasd.txt");
+
+            if(nk_button_label(ctx, buffer)){
+
+              load_text(buffer);
+            }
+        }
+    }
+    nk_end(ctx);
+}
+
+
+
+// gui main me encantaria llamarle renegator3000
+void GUI(struct nk_context *ctx){
+
+    layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
+    Text_title(ctx);
+    searcher(ctx);
+
+}
+
+// fin de gui
+
 static void die(const char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
@@ -414,9 +480,6 @@ int main(void){
     strcpy(title, title_placeholder);
     title_len=sizeof(title_placeholder);
 
-
-
-
     while (running)
     {
         /* Input */
@@ -442,69 +505,7 @@ int main(void){
         nk_input_end(ctx);
 
         /* GUI */
-
-        if (nk_begin(ctx, "backgraund", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ),0)){
-
-        }nk_end(ctx);
-
-        layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
-
-       /* if (nk_begin(ctx,"Sidebar", sidebarRect, 1),NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE ){
-            nk_layout_row_dynamic(ctx, 25, 1);
-                nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
-
-                nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
-                //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
-                nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
-                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
-
-                nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
-            
-        }
-            nk_end(ctx);
-*/
-
-        if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){    
-                
-                nk_layout_row_dynamic(ctx, 25, 1);
-                nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
-
-               // if (nk_group_begin(ctx, "scroll", NK_WINDOW_BORDER)) {
-                nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
-                //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
-                
-                nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
-                nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
-              //  }
-              //  nk_group_end(ctx)
-                nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
-
-
-                if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
-                    int i = 0;
-                    char buffer[64];
-                    nk_layout_row_dynamic(ctx, 25, 2);
-                    for (i = 0; i < 64; ++i) {
-                        sprintf(buffer, "%08d", ((((i % 7) * 10) ^ 32)) + (64 + (i % 2) * 2));
-                        nk_button_label(ctx, buffer);
-                    }
-                    nk_group_end(ctx);
-                }
-                nk_layout_row_end(ctx);
-
-        }
-       
-       
-        nk_layout_row_static(ctx, 30, 80, 2);
-        if (nk_button_label(ctx, "Button")){
-            strcpy(title_save_buf, title);
-            save_text(text, title_save_buf);
-        }
-        nk_end(ctx);
-        if (nk_window_is_hidden(ctx, "Text Editor")) break;
-
-       
-
+        GUI(ctx);
 
         /* Draw */
         XClearWindow(xw.dpy, xw.win);
@@ -518,11 +519,4 @@ int main(void){
     }
 
 }
-void cleanup(XWindow *xw){
-    nk_xfont_del((*xw).dpy, (*xw).font);
-    nk_xlib_shutdown();
-    XUnmapWindow((*xw).dpy, (*xw).win);
-    XFreeColormap((*xw).dpy, (*xw).cmap);
-    XDestroyWindow((*xw).dpy, (*xw).win);
-    XCloseDisplay((*xw).dpy);
-}
+
