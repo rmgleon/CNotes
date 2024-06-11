@@ -22,17 +22,16 @@ void save_text(char *text, char* title) {
     char actual=title[0];
 
 
-    // Dios te ayude
-    for(int i=0;i<MAX_TITLE_LENGTH && actual!='\0';i++, actual=title[i]){
+    // Reemplaza los espacios por guiones bajos
+    /*for(int i=0;i<MAX_TITLE_LENGTH && actual!='\0';i++, actual=title[i]){
         if(actual==' '){
             title[i]='_';
         }
-    }
+    }*/
 
-    // Create the filename with ".txt" extension
-    char filename[MAX_TITLE_LENGTH + 4];  // Extra space for ".txt" and null terminator
+    // Crea el archivo con la extension ".txt"
+    char filename[MAX_TITLE_LENGTH + 4];  // Espacio extra para ".txt"
     snprintf(filename, sizeof(filename), "%s.txt", title);
-
 
     char path[MAX_TITLE_LENGTH+20]={0};
 
@@ -50,8 +49,11 @@ void save_text(char *text, char* title) {
 }
 
 /* Function to load text from a file */
-void load_text(char *text) {
-    FILE *file = fopen(text, "r");
+void load_text(char *text, char *title) {
+    char path[MAX_TITLE_LENGTH];
+    strcpy(path,title);
+    strcat(path,".txt");
+    FILE *file = fopen(title, "r");
     if (file) {
         size_t length = fread(text, sizeof(char), MAX_TEXT_LENGTH - 1, file);
         text[length] = '\0';  // Null-terminate the string
