@@ -21,7 +21,9 @@
 #include "../nuklear/nuklear_xlib.h"
 
 // Hecho por nosotros
-#include "../src/file_actions.h"
+#include "file_actions.h"
+#include "list_actions.h"
+
 
 #define DTIME           20
 #define WINDOW_WIDTH    800
@@ -164,7 +166,11 @@ char* paste_from_clipboard(XWindow *xw) {
 }
 
 int main(void){
+    // Startup Stuff
     system("mkdir notes");
+    list_node* list=NULL;
+
+
     long dt;
     long started;
     int running = 1;
@@ -204,15 +210,8 @@ int main(void){
     /* GUI */
     xw.font = nk_xfont_create(xw.dpy, "fixed");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
-    char title_placeholder[]={"Titulo:"};
-    strcpy(title, title_placeholder);
-    title_len=sizeof(title_placeholder-1);
 
-
-
-
-    while (running)
-    {
+    while (running){
         /* Input */
         XEvent evt;
         started = timestamp();
@@ -231,7 +230,7 @@ int main(void){
                     char *clipboard_text = paste_from_clipboard(&xw);
                     if (clipboard_text) {
                         strncat(text, clipboard_text, sizeof(text) - text_len - 1);
-                        text_len = strlen(text);
+                        text_len = text_len + sizeof(clipboard_text);
                         XFree(clipboard_text);
                     }
                 }
@@ -275,15 +274,26 @@ int main(void){
        
        
         nk_layout_row_static(ctx, 30, 80, 2);
-        if (nk_button_label(ctx, "Button")){
+        if (nk_button_label(ctx, "Save")){
             strcpy(title_save_buf, title);
             save_text(text, title_save_buf);
         }
+        if (nk_button_label(ctx, "Save to list")){
+            add_list_node(title, &list);
+        }
+        if (nk_button_label(ctx, "Show list")){
+            show_list_nodes(&list);
+        }
+        if (nk_button_label(ctx, "Save list.txt")){
+            save_list_nodes(&list);
+        }
+        if (nk_button_label(ctx, "Load list.txt")){
+            load_list_nodes(&list);
+        }
+
+
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
-
-       
-
 
         /* Draw */
         XClearWindow(xw.dpy, xw.win);

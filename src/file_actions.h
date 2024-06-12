@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_TEXT_LENGTH 100
+#define MAX_TEXT_LENGTH 16384 // 1024 * 16
 #define MAX_TITLE_LENGTH 105
 
 /* Function to save text to a file */
@@ -19,7 +19,7 @@ void save_text(char *text, char* title) {
         return;
     }
 
-    char actual=title[0];
+    //char actual=title[0];
 
 
     // Reemplaza los espacios por guiones bajos
@@ -40,6 +40,7 @@ void save_text(char *text, char* title) {
 
     FILE *file = fopen(path, "w");
     if (file) {
+        file = fopen(path, "w");
         fwrite(text, sizeof(char), strlen(text), file);
         fclose(file);
         printf("Text saved to %s\n", filename);
@@ -48,7 +49,7 @@ void save_text(char *text, char* title) {
     }
 }
 
-/* Function to load text from a file */
+// Toma un texto y un titulo, reescribe el texto al nuevo texto
 void load_text(char *text, char *title) {
     char path[MAX_TITLE_LENGTH];
     strcpy(path,title);

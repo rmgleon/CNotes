@@ -2,7 +2,7 @@
 BIN = CNotes
 
 # Flags
-CFLAGS += -std=c11 -Wall -Wextra -pedantic -Wno-unused-function -O2
+CFLAGS += -std=c11
 
 SRC = src/app.c
 OBJ = $(SRC:.c=.o)
