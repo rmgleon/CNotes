@@ -446,68 +446,6 @@ void layout(struct nk_context *ctx, int windowWidth) {
     nk_end(ctx);
 }
 
-void Text_title(struct nk_context *ctx){
-
-    if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH, WINDOW_HEIGHT ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){    
-                
-        nk_layout_row_dynamic(ctx, 25, 1);
-        nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
-
-        nk_layout_row_begin(ctx, NK_DYNAMIC, 350, 2); // Begin a new row with dynamic width
-        //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
-                
-        nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
-        nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
-        
-
-        nk_layout_row_end(ctx);
-
-    }
-       
-    nk_layout_row_static(ctx, 30, 80, 2);
-    if (nk_button_label(ctx, "Button")){
-        strcpy(title_save_buf, title);
-        save_text(text, title_save_buf);
-    }
-
-    nk_end(ctx);
-        
-}
-
-void searcher(struct nk_context *ctx){
-
-    // nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
-    if (nk_begin(ctx, "grup", nk_rect(400, 45,NK_DYNAMIC,NK_DYNAMIC ), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE)){
-        int i = 0;
-        char buffer[64];
-        nk_layout_row_dynamic(ctx, 25, 2);
-
-        for (i = 0; i < 3; ++i) {
-
-            sprintf(buffer, "%s", "asdasd.txt");
-
-            if(nk_button_label(ctx, buffer)){
-
-              load_text(buffer);
-            }
-        }
-    }
-    nk_end(ctx);
-}
-
-
-
-// gui main me encantaria llamarle renegator3000
-void GUI(struct nk_context *ctx){
-
-    layout(ctx,WINDOW_WIDTH); // Llamada a la función de diseño del menú
-    Text_title(ctx);
-    searcher(ctx);
-
-}
-
-// fin de gui
-
 // gui main me encantaria llamarle renegator3000
 void GUI(struct nk_context *ctx){
 
@@ -606,12 +544,4 @@ int main(void){
             sleep_for(DTIME - dt);
     }
 
-}
-void cleanup(XWindow *xw){
-    nk_xfont_del((*xw).dpy, (*xw).font);
-    nk_xlib_shutdown();
-    XUnmapWindow((*xw).dpy, (*xw).win);
-    XFreeColormap((*xw).dpy, (*xw).cmap);
-    XDestroyWindow((*xw).dpy, (*xw).win);
-    XCloseDisplay((*xw).dpy);
 }
