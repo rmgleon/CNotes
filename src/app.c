@@ -259,15 +259,18 @@ static void set_style(struct nk_context *ctx, enum theme theme)
 // inicio de gui
 
 // ventana de texto e titulo
+int WINDOW_HEIGHT_OFFSET = 35;
+
+
 void Text_title(struct nk_context *ctx){
 
-    if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH-(WINDOW_WIDTH*30/100), WINDOW_HEIGHT - 35), NK_WINDOW_BORDER
+    if (nk_begin(ctx, "Text Editor", nk_rect(0, 35, WINDOW_WIDTH-(WINDOW_WIDTH*30/100), WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET), NK_WINDOW_BORDER
     | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE)){    
                 
         nk_layout_row_dynamic(ctx, 25, 1);
         nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
 
-        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - 35, 1); // Begin a new row with dynamic width
+        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET -115, 1); // Begin a new row with dynamic width
         //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
                 
         nk_layout_row_push(ctx, 0); // Push 70% of the space for the text editor
@@ -291,10 +294,10 @@ void Text_title(struct nk_context *ctx){
 // Ventana de archivo
 void Archive(struct nk_context *ctx){
 
-     if (nk_begin(ctx, "Archive", nk_rect(WINDOW_WIDTH-(WINDOW_WIDTH*30/100), 35, WINDOW_WIDTH-(WINDOW_WIDTH*70/100), WINDOW_HEIGHT - 35),
+     if (nk_begin(ctx, "Archive", nk_rect(WINDOW_WIDTH-(WINDOW_WIDTH*30/100), WINDOW_HEIGHT_OFFSET, WINDOW_WIDTH-(WINDOW_WIDTH*70/100), WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET),
         NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |NK_WINDOW_TITLE)){    
                 
-        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - 50, 2); // ventana dianmica , el 2 representa los modos , puede ser 1 o 2 o3 o4
+        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET, 2); // ventana dianmica , el 2 representa los modos , puede ser 1 o 2 o3 o4
         nk_layout_row_push(ctx,0); // para ajustado de tamaño 
 
         if (nk_group_begin(ctx, "Archives", NK_WINDOW_BORDER)) {
@@ -387,7 +390,7 @@ void layout(struct nk_context *ctx, int windowWidth) {
                 // Definir elementos del menú
                 if (nk_menu_item_label(ctx, " THEME_BLACK", NK_TEXT_LEFT)) {
                     
-                     set_style(ctx, THEME_RED);
+                     set_style(ctx, THEME_BLACK);
                 }
 
                 if (nk_menu_item_label(ctx, " THEME_WHITE", NK_TEXT_LEFT)) {
