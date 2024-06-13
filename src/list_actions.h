@@ -18,9 +18,9 @@ void add_list_node(char* title, list_node** list){
     // buscar si existe con hash, todavia no se implemento
     if(title==NULL)return;
     list_node* aux=(list_node*)malloc(sizeof(list_node));
-    if(list==NULL){
+    if(*list==NULL){
         *list=aux;
-        (*list)->titulo=(char*)malloc(sizeof(title));
+        (*list)->titulo=(char*)malloc(sizeof(title) + 1);
         strcpy((*list)->titulo, title);
         (*list)->sig=NULL;
     }
