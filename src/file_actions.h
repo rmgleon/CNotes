@@ -55,7 +55,7 @@ void load_text(char *text, char *title) {
     char path[MAX_TITLE_LENGTH + 10];
     snprintf(path, sizeof(path), "notes/%s.txt", title);
     FILE *file = fopen(path, "r");
-    if (file != NULL) {
+    if (file) {
         size_t length = fread(text, sizeof(char), MAX_TEXT_LENGTH - 1, file);
         text[length] = '\0';  // Null-terminate the string
         fclose(file);

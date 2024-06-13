@@ -18,18 +18,13 @@ void add_list_node(char* title, list_node** list){
     // buscar si existe con hash, todavia no se implemento
     if(title==NULL)return;
     list_node* aux=(list_node*)malloc(sizeof(list_node));
-    if(*list==NULL){
-        *list=aux;
-        (*list)->titulo=(char*)malloc(sizeof(title) + 1);
-        strcpy((*list)->titulo, title);
-        (*list)->sig=NULL;
+    if (!aux) {
+        perror("Error al asignar memoria\n");
+        return;
     }
-    else{
-        aux->sig=*list;
-        *list=aux;
-        (*list)->titulo=(char*)malloc(sizeof(title));
-        strcpy((*list)->titulo,title);
-    }
+    aux->titulo = strdup(title); // Copiar la cadena de entrada
+    aux->sig = *list;
+    *list = aux;
 }
 
 void load_list_nodes(list_node** list){

@@ -23,6 +23,7 @@
 // Hecho por nosotros
 #include "file_actions.h"
 #include "list_actions.h"
+#include "hash_actions.h"
 
 
 #define DTIME           20
@@ -170,6 +171,12 @@ int main(void){
     system("mkdir notes");
     list_node* list=NULL;
 
+    list_node *hash_table[tam_hash];
+
+    initialize_hash(hash_table);
+
+    load_hash_node(hash_table, &list);
+
 
     long dt;
     long started;
@@ -248,7 +255,7 @@ int main(void){
             NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |
             NK_WINDOW_TITLE)){    
                 nk_layout_row_dynamic(ctx, 25, 1);
-                nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+                nk_edit_string(ctx, NK_EDIT_FIELD, title, &title_len, sizeof(title), nk_filter_default);
 
                 nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
                 //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
@@ -284,18 +291,20 @@ int main(void){
         if (nk_button_label(ctx, "Save")){
             strcpy(title_save_buf, title);
             save_text(text, title_save_buf);
-        }
-        if (nk_button_label(ctx, "Save to list")){
-            add_list_node(title, &list);
-        }
-        if (nk_button_label(ctx, "Show list")){
-            show_list_nodes(&list);
-        }
-        if (nk_button_label(ctx, "Save list.txt")){
+            add_hash_node(title, hash_table, &list);
             save_list_nodes(&list);
         }
-        if (nk_button_label(ctx, "Load list.txt")){
-            load_list_nodes(&list);
+        if (nk_button_label(ctx, "Save to hash")){
+          //  add_hash_node(title, hash_table, &list);
+        }
+        if (nk_button_label(ctx, "Show hash")){
+            show_hash(hash_table);
+        }
+        if (nk_button_label(ctx, "Save list.txt")){
+           // save_list_nodes(&list);
+        }
+        if (nk_button_label(ctx, "Load hash.txt")){
+            //load_hash_node(hash_table, &list);
         }
 
 
