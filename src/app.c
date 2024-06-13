@@ -259,12 +259,19 @@ int main(void){
 
 
                 if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
-                    int i = 0;
-                    char buffer[64];
                     nk_layout_row_dynamic(ctx, 25, 2);
-                    for (i = 0; i < 64; ++i) {
-                        sprintf(buffer, "%08d", ((((i % 7) * 10) ^ 32)) + (64 + (i % 2) * 2));
-                        nk_button_label(ctx, buffer);
+                    char buffer[64];
+
+                    list_node *aux = list;
+
+                    // Recorre la lista mostrando en el layout los titulos de los textos
+
+                    while(aux != NULL) {
+                        sprintf(buffer, "%s", aux->titulo);
+                        if(nk_button_label(ctx, buffer)){
+                            load_text(text, aux->titulo); // Al hacer click llama a la funcion para abrir el texto
+                        }
+                        aux = aux->sig;
                     }
                     nk_group_end(ctx);
                 }
