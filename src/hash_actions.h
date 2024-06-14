@@ -75,6 +75,62 @@ void add_hash_node(char *current_title, list_node *hash_table[], list_node **lis
     
 }
 
+// Función para eliminar un nodo de la tabla hash y también de la lista
+void delete_hash_node(char *current_title, list_node *hash_table[], list_node **list) {
+    uint32_t hash = adler32(current_title, strlen(current_title));
+    uint32_t index = hash % tam_hash;
+
+    list_node *current = hash_table[index];
+    list_node *prev = NULL;
+
+    // Buscar el nodo en la tabla hash
+    while (current != NULL && strcmp(current->titulo, current_title) != 0) {
+        prev = current;
+        current = current->sig;
+    }
+
+    if (current == NULL) {
+        // El título no se encontró en la tabla hash
+        return;
+    }
+
+    // Eliminar el nodo de la tabla hash
+    if (prev == NULL) {
+        // El nodo a eliminar es el primero en la lista
+        hash_table[index] = current->sig;
+    } else {
+        prev->sig = current->sig;
+    }
+
+    // Buscar el nodo en la lista enlazada
+    list_node *list_current = *list;
+    list_node *list_prev = NULL;
+
+    while (list_current != NULL && strcmp(list_current->titulo, current_title) != 0) {
+        list_prev = list_current;
+        list_current = list_current->sig;
+    }
+
+    if (list_current == NULL) {
+        // El título no se encontró en la lista enlazada
+        return;
+    }
+
+    // Eliminar el nodo de la lista enlazada
+    if (list_prev == NULL) {
+        // El nodo a eliminar es el primero en la lista
+        *list = list_current->sig;
+    } else {
+        list_prev->sig = list_current->sig;
+    }
+
+    // Libera memoria del nodo eliminado
+    free(current->titulo);
+    free(current);
+    free(list_current->titulo);
+    free(list_current);
+}
+
 void load_hash_node(list_node** hash_table, list_node **list){
     char list_file[] = "notes/list.txt";
     char current_title[MAX_TITLE_LENGTH];
