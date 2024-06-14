@@ -129,6 +129,22 @@ void delete_hash_node(char *current_title, list_node *hash_table[], list_node **
     free(current);
     free(list_current->titulo);
     free(list_current);
+
+    // Ahora actualizamos el archivo list.txt
+    FILE *file = fopen("notes/list.txt", "w");
+    if (file == NULL) {
+        perror("No se pudo abrir list.txt para escritura");
+        return;
+    }
+
+    // Escribir los títulos que quedan en la lista en memoria al archivo
+    list_node *temp = *list;
+    while (temp != NULL) {
+        fprintf(file, "%s\n", temp->titulo);
+        temp = temp->sig;
+    }
+
+    fclose(file);
 }
 
 void load_hash_node(list_node** hash_table, list_node **list){
