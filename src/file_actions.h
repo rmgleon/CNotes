@@ -51,7 +51,7 @@ void save_text(char *text, char* title) {
 
 // Toma un texto y un titulo, reescribe el texto al nuevo texto
 // Falta devolver al buffer
-void load_text(char *text, char *title) {
+int load_text(char *text, char *title) {
     char path[MAX_TITLE_LENGTH + 10];
     snprintf(path, sizeof(path), "notes/%s.txt", title);
     FILE *file = fopen(path, "r");
@@ -59,10 +59,12 @@ void load_text(char *text, char *title) {
         size_t length = fread(text, sizeof(char), MAX_TEXT_LENGTH - 1, file);
         text[length] = '\0';  // Null-terminate the string
         fclose(file);
-        printf("Text loaded from %s\n", text);
+        printf("Text loaded from %s\n", path);
     } else {
         printf("Failed to open file for reading\n");
+        return 0;
     }
+    return 1;
 }
 
 #endif
