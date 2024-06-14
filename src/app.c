@@ -275,8 +275,13 @@ int main(void){
 
                     while(aux != NULL) {
                         sprintf(buffer, "%s", aux->titulo);
-                        if(nk_button_label(ctx, buffer)){
-                            load_text(text, aux->titulo); // Al hacer click llama a la funcion para abrir el texto
+                        if(nk_button_label(ctx, buffer)){ // Al hacer click llama a la funcion para abrir el texto
+                            strcpy(title, aux->titulo);
+                            title_len = strlen(title);
+                            if(load_text(text, aux->titulo) == 0){
+                                delete_hash_node(aux->titulo, hash_table, &list);
+                            } 
+                            text_len = strlen(text);
                         }
                         aux = aux->sig;
                     }
@@ -289,10 +294,16 @@ int main(void){
        
         nk_layout_row_static(ctx, 30, 80, 2);
         if (nk_button_label(ctx, "Save")){
-            strcpy(title_save_buf, title);
-            save_text(text, title_save_buf);
-            add_hash_node(title, hash_table, &list);
-            save_list_nodes(&list);
+                //Comprueba que haya titulo o texto
+                //No funciona bien lo que está en función save_text()
+                if(!text_len > 0 || !title_len > 0){
+                    printf("Error al guardar archivo. Título o texto vacío.\n");
+                } else {
+                    strcpy(title_save_buf, title);
+                    save_text(text, title_save_buf);
+                    add_hash_node(title, hash_table, &list);
+                    save_list_nodes(&list);
+                }
         }
         if (nk_button_label(ctx, "Save to hash")){
           //  add_hash_node(title, hash_table, &list);
