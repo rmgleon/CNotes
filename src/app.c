@@ -20,7 +20,6 @@
 #include "../nuklear/nuklear.h"
 #include "../nuklear/nuklear_xlib.h"
 
-// Hecho por nosotros
 #include "../src/file_actions.h"
 //#include "../src/style.c"
 
@@ -35,8 +34,6 @@ char title[100] = {0}; // Titulo
 int text_len = 0;
 int title_len = 0;
 char title_save_buf[100];
-
-
 
 typedef struct XWindow XWindow;
 struct XWindow {
@@ -270,8 +267,7 @@ void Text_title(struct nk_context *ctx){
         nk_layout_row_dynamic(ctx, 25, 1);
         nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
 
-        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET -115, 1); // Begin a new row with dynamic width
-        //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
+        nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET -115, 1);
                 
         nk_layout_row_push(ctx, 0); // Push 70% of the space for the text editor
         nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
@@ -286,8 +282,6 @@ void Text_title(struct nk_context *ctx){
         strcpy(title_save_buf, title);
         save_text(text, title_save_buf);
     }
- //   if (nk_window_is_hidden(ctx, "Text Editor")){ 
-  //      break; se deberia implementar en while
     nk_end(ctx);
     
 }
@@ -319,8 +313,7 @@ void Archive(struct nk_context *ctx){
             }nk_group_end(ctx);
 
         }nk_layout_row_end(ctx);
-   //     if (nk_window_is_hidden(ctx, "Text Editor")){ 
-  //      break;  deberia implemntar en while
+
     } nk_end(ctx);
 
     
@@ -383,7 +376,7 @@ void layout(struct nk_context *ctx, int windowWidth) {
 
               
             // Comenzar el menú "THEMEs"
-            if (nk_menu_begin_label(ctx, "themes  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+            if (nk_menu_begin_label(ctx, "Themes  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
                 nk_layout_row_dynamic(ctx, 20, 1);
 
@@ -423,7 +416,7 @@ void layout(struct nk_context *ctx, int windowWidth) {
             }
 
             // Comenzar el menú "Herramientas"
-            if (nk_menu_begin_label(ctx, "Herramientas  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
+            if (nk_menu_begin_label(ctx, "Tools  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
                 nk_layout_row_dynamic(ctx, 20, 1);
 
@@ -466,11 +459,6 @@ int main(void){
     int running = 1;
     XWindow xw;
     struct nk_context *ctx;
-    char text[1024 * 16] = {0}; /* Buffer for text input */
-    char title[100] = {0}; // Titulo
-    int text_len = 0;
-    int title_len = 0;
-    char title_save_buf[100];
 
     /* X11 */
     memset(&xw, 0, sizeof xw);
@@ -505,6 +493,7 @@ int main(void){
     /* GUI */
     xw.font = nk_xfont_create(xw.dpy, "fixed");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
+
     char title_placeholder[]={"Titulo:"};
     strcpy(title, title_placeholder);
     title_len=sizeof(title_placeholder);
