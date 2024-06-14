@@ -266,59 +266,58 @@ int main(void){
 
 
                 if (nk_group_begin(ctx, "Group_With_Border", NK_WINDOW_BORDER)) {
-                    nk_layout_row_dynamic(ctx, 25, 2);
-                    char buffer[64];
 
+                    // Cuadro de texto para búsqueda
+                    static char search_buffer[256] = "";
+                    nk_layout_row_dynamic(ctx, 25, 1);
+                    nk_label(ctx, "Buscar:", NK_TEXT_LEFT);
+                    nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, search_buffer, sizeof(search_buffer), nk_filter_default);
+
+                    // Recorrer la lista y mostrar los elementos filtrados
                     list_node *aux = list;
-
-                    // Recorre la lista mostrando en el layout los titulos de los textos
-
                     while(aux != NULL) {
-                        sprintf(buffer, "%s", aux->titulo);
-                        if(nk_button_label(ctx, buffer)){ // Al hacer click llama a la funcion para abrir el texto
-                            strcpy(title, aux->titulo);
-                            title_len = strlen(title);
-                            if(load_text(text, aux->titulo) == 0){
-                                delete_hash_node(aux->titulo, hash_table, &list);
-                            } 
-                            text_len = strlen(text);
+                          // Verificar si el título actual contiene el texto de búsqueda
+                        if (strstr(aux->titulo, search_buffer) != NULL) {
+                            if(nk_button_label(ctx, aux->titulo)){ // Al hacer click llama a la funcion para abrir el texto
+                                strcpy(title, aux->titulo);
+                                title_len = strlen(title);
+                                if(load_text(text, aux->titulo) == 0){
+                                    delete_hash_node(aux->titulo, hash_table, &list);
+                                }
+                                text_len = strlen(text);
+                            }       
                         }
                         aux = aux->sig;
                     }
                     nk_group_end(ctx);
                 }
-                nk_layout_row_end(ctx);
-
+            nk_layout_row_end(ctx);
         }
-       
-       
         nk_layout_row_static(ctx, 30, 80, 2);
         if (nk_button_label(ctx, "Save")){
-                //Comprueba que haya titulo o texto
-                //No funciona bien lo que está en función save_text()
-                if(!text_len > 0 || !title_len > 0){
-                    printf("Error al guardar archivo. Título o texto vacío.\n");
-                } else {
-                    strcpy(title_save_buf, title);
-                    save_text(text, title_save_buf);
-                    add_hash_node(title, hash_table, &list);
-                    save_list_nodes(&list);
-                }
+            //Comprueba que haya titulo o texto
+            //No funciona bien lo que está en función save_text()
+            if(!text_len > 0 || !title_len > 0){
+            printf("Error al guardar archivo. Título o texto vacío.\n");
+            } else {
+                strcpy(title_save_buf, title);
+                save_text(text, title_save_buf);
+                add_hash_node(title, hash_table, &list);
+                save_list_nodes(&list);
+            }
         }
         if (nk_button_label(ctx, "Save to hash")){
-          //  add_hash_node(title, hash_table, &list);
+            //  add_hash_node(title, hash_table, &list);
         }
         if (nk_button_label(ctx, "Show hash")){
             show_hash(hash_table);
         }
         if (nk_button_label(ctx, "Save list.txt")){
-           // save_list_nodes(&list);
+            // save_list_nodes(&list);
         }
         if (nk_button_label(ctx, "Load hash.txt")){
             //load_hash_node(hash_table, &list);
         }
-
-
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
 
@@ -329,10 +328,8 @@ int main(void){
 
         /* Timing */
         dt = timestamp() - started;
-        if (dt < DTIME)
-            sleep_for(DTIME - dt);
+        if (dt < DTIME) sleep_for(DTIME - dt);
     }
-
 }
 void cleanup(XWindow *xw){
     nk_xfont_del((*xw).dpy, (*xw).font);
