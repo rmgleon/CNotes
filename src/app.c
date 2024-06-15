@@ -177,6 +177,7 @@ int main(void){
 
     load_hash_node(hash_table, &list);
 
+    int edit_mode = 1;
 
     long dt;
     long started;
@@ -215,7 +216,7 @@ int main(void){
     xw.utf8_string = XInternAtom(xw.dpy, "UTF8_STRING", False);
 
     /* GUI */
-    xw.font = nk_xfont_create(xw.dpy, "fixed");
+    xw.font = nk_xfont_create(xw.dpy, "arial");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
 
     while (running){
@@ -257,10 +258,15 @@ int main(void){
                 nk_layout_row_dynamic(ctx, 25, 1);
                 nk_edit_string(ctx, NK_EDIT_FIELD, title, &title_len, sizeof(title), nk_filter_default);
 
-                nk_layout_row_begin(ctx, NK_DYNAMIC, 400, 2); // Begin a new row with dynamic width
+                nk_layout_row_begin(ctx, NK_DYNAMIC, 300, 3); // Begin a new row with dynamic width
                 //nk_layout_row_dynamic(ctx, 400, 1); // Ensure enough space for the tex
                 nk_layout_row_push(ctx, 0.7f); // Push 70% of the space for the text editor
+                
+            if (edit_mode) {
                 nk_edit_string(ctx, NK_EDIT_BOX | NK_EDIT_MULTILINE | NK_EDIT_AUTO_SELECT, text, &text_len, sizeof(text), nk_filter_default);
+            } else {
+                nk_label_wrap(ctx, text);
+            }
 
                 nk_layout_row_push(ctx, 0.3f); // Push 30% of the space for the group
 
@@ -293,7 +299,7 @@ int main(void){
                 }
             nk_layout_row_end(ctx);
         }
-        nk_layout_row_static(ctx, 30, 80, 2);
+        nk_layout_row_static(ctx, 30, 80, 5);
         if (nk_button_label(ctx, "Save")){
             //Comprueba que haya titulo o texto
             //No funciona bien lo que está en función save_text()
@@ -306,18 +312,22 @@ int main(void){
                 save_list_nodes(&list);
             }
         }
-        if (nk_button_label(ctx, "Save to hash")){
-            //  add_hash_node(title, hash_table, &list);
-        }
         if (nk_button_label(ctx, "Show hash")){
             show_hash(hash_table);
+        }
+        if (nk_button_label(ctx, "Alternar")) {
+            edit_mode = !edit_mode;
+        }
+        /*
+        if (nk_button_label(ctx, "Save to hash")){
+            add_hash_node(title, hash_table, &list);
         }
         if (nk_button_label(ctx, "Save list.txt")){
             // save_list_nodes(&list);
         }
         if (nk_button_label(ctx, "Load hash.txt")){
             //load_hash_node(hash_table, &list);
-        }
+        }*/
         nk_end(ctx);
         if (nk_window_is_hidden(ctx, "Text Editor")) break;
 
