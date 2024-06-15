@@ -17,7 +17,9 @@ include_directories(${X11_INCLUDE_DIR})
 # Specify the source files
 set(SOURCES
    src/app.c
-   #src/style.c
+   src/style.c
+   src/GUI.c
+   src/node_editor.c
 )
 
 # Añadir los archivos fuente al ejecutable

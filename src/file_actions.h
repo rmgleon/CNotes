@@ -4,6 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+char text[1024 * 16] = {0}; /* Buffer for text input */
+char title[100] = {0}; // Titulo
+int text_len = 0;
+int title_len = 0;
+char title_save_buf[100];
+
 #define MAX_TEXT_LENGTH 100
 #define MAX_TITLE_LENGTH 105
 
