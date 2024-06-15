@@ -76,27 +76,56 @@ static void sleep_for(long t){
     req.tv_nsec = ms * 1000000L;
     while(-1 == nanosleep(&req, &req));
 }
+
+// GUI archives
 #define INCLUDE_ALL
 #define INCLUDE_STYLE
-#define INCLUDE_GUI
+#define INCLUDE_GUI_TEXT_TITLE
+#define INCLUDE_GUI_ARCHIVE
+#define INCLUDE_GUI_LAYOUT
 #define INCLUDE_NODE_EDITOR 
 
 #ifdef INCLUDE_ALL
 
-  #define INCLUDE_STYLE
-  #define INCLUDE_GUI
-  #define INCLUDE_NODE_EDITOR
+    #define INCLUDE_STYLE
+    #define INCLUDE_GUI_TEXT_TITLE
+    #define INCLUDE_GUI_ARCHIVE
+    #define INCLUDE_GUI_LAYOUT
+    #define INCLUDE_NODE_EDITOR
+
+#endif
+
+#ifdef INCLUDE_STYLE
+
+    #include "../src/style.c"
+
+#endif
+
+#ifdef INCLUDE_GUI_TEXT_TITLE
+
+    #include "../src/Gui_Text_Title.c"
+
+#endif
+
+#ifdef INCLUDE_GUI_ARCHIVE
+
+    #include "../src/Gui_Archive.c"
+
+#endif
+
+#ifdef INCLUDE_GUI_LAYOUT
+
+    #include "../src/Gui_Layout.c"
 
 #endif
 
 #ifdef INCLUDE_NODE_EDITOR
-  #include "../src/style.c"
-  #include "../src/GUI.c"
-  #include "../src/node_editor.c"
+
+  #include "../src/Gui_Connector.c"
   
 #endif
 
-
+//main
 int main(void){
     long dt;
     long started;
@@ -156,9 +185,13 @@ int main(void){
 
         /* GUI */
 
-        #ifdef INCLUDE_NODE_EDITOR
-            GUI(ctx);
-            node_editor(ctx);
+        #ifdef INCLUDE_ALL
+
+            layout(ctx); // Llamada a la función de diseño del menú
+            Text_title(ctx); // llama funcion de espacio de escritura de texto y titulo
+            Archive(ctx); // llama a la funcion de ventana visualizador de archivos txt
+            node_editor(ctx);// llama elazador de notas
+
         #endif
 
         /* Draw */
