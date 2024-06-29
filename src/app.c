@@ -24,7 +24,7 @@
 #include "file_actions.h"
 #include "list_actions.h"
 #include "hash_actions.h"
-
+#include "huffman.h"
 
 #define DTIME           20
 #define WINDOW_WIDTH    800
@@ -84,7 +84,7 @@ void layout(struct nk_context *ctx, int windowWidth) { // barra de menu en la pa
                 }
                 if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {       
                     strcpy(title_save_buf, title);
-                    save_text(text, title_save_buf);
+                    compressBuffer(text, title_save_buf);
                 }
                 if (nk_menu_item_label(ctx, "Exit", NK_TEXT_LEFT)) {
                     // Acción para "Exit"
@@ -287,7 +287,7 @@ int main(void){
                             if(nk_button_label(ctx, aux->titulo)){ // Al hacer click llama a la funcion para abrir el texto
                                 strcpy(title, aux->titulo);
                                 title_len = strlen(title);
-                                if(load_text(text, aux->titulo) == 0){
+                                if(decompressBuffer(text, aux->titulo) == 0){
                                     delete_hash_node(aux->titulo, hash_table, &list);
                                 }
                                 text_len = strlen(text);
@@ -302,12 +302,12 @@ int main(void){
         nk_layout_row_static(ctx, 30, 80, 5);
         if (nk_button_label(ctx, "Save")){
             //Comprueba que haya titulo o texto
-            //No funciona bien lo que está en función save_text()
+            //No funciona bien lo que está en función compressBuffer()
             if(!text_len > 0 || !title_len > 0){
             printf("Error al guardar archivo. Título o texto vacío.\n");
             } else {
                 strcpy(title_save_buf, title);
-                save_text(text, title_save_buf);
+                compressBuffer(text, title_save_buf);
                 add_hash_node(title, hash_table, &list);
                 save_list_nodes(&list);
             }
