@@ -1,7 +1,7 @@
 // barra de menu en la parte arriba
 void layout(struct nk_context *ctx) { 
       
-    // Iniciar la ventana del menú en la parte superior de la ventana
+    // iniciar la ventana del menú en la parte superior de la ventana
     if (nk_begin(ctx, "Menu", nk_rect(0, 0,7680, 35), 0)) {  //7680 = 8k
         // Iniciar la barra de menú
         nk_menubar_begin(ctx);
@@ -24,6 +24,8 @@ void layout(struct nk_context *ctx) {
                 if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {       
                     strcpy(title_save_buf, title);
                     compressBuffer(text, title_save_buf);
+                    add_hash_node(title);
+                    save_list_nodes(&list);
                 }
                 if (nk_menu_item_label(ctx, "Exit", NK_TEXT_LEFT)) {
                     // Acción para "Exit"

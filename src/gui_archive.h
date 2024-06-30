@@ -1,5 +1,5 @@
 // Ventana de archivo
-void Archive(struct nk_context *ctx){
+void archive(struct nk_context *ctx){
 
      if (nk_begin(ctx, "Archive", nk_rect(1, WINDOW_HEIGHT_OFFSET, WINDOW_WIDTH-(WINDOW_WIDTH*80/100), WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET),
         NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE |NK_WINDOW_TITLE)){    

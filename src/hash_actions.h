@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdint.h>
 
-#define MOD_ADLER 65521
 #define tam_hash 1000
 
 list_node* list=NULL;
@@ -17,23 +16,19 @@ void initialize_hash(){
 	}
 }
 
-
-// Ni idea que hace esto pero algo hace
-uint32_t adler32(const char *data, size_t len) {
-    uint32_t a = 1, b = 0;
-
-    for (size_t i = 0; i < len; ++i) {
-        a = (a + data[i]) % MOD_ADLER;
-        b = (b + a) % MOD_ADLER;
-    }
-
-    return (b << 16) | a;
+unsigned long hash_modulo(const char *title) {
+	unsigned long hash = 0;
+	int c;
+	while ((c = *title++)) {
+		hash = (hash * 31 + c) % tam_hash;
+	}
+	return hash;
 }
 
 // Comprueba que el titulo no exista en la tabla hash
 int title_exists(const char *title, list_node *hash_table[]) {
-    uint32_t hash = adler32(title, strlen(title));
-    uint32_t index = hash % tam_hash;
+    unsigned long hash = hash_modulo(title);
+    unsigned long index = hash;
 
     list_node *aux = hash_table[index];
     while (aux) {
@@ -62,8 +57,8 @@ void add_hash_node(char *current_title){
     new_node->titulo = strdup(current_title); // Copiar la cadena de entrada
     new_node->sig = NULL;
 
-	uint32_t hash = adler32(current_title, strlen(current_title));
-    uint32_t index = hash % tam_hash;
+	unsigned long hash = hash_modulo(current_title);
+    unsigned long index = hash;
 
     new_node->sig = hash_table[index];
     hash_table[index] = new_node;
@@ -81,8 +76,8 @@ void add_hash_node(char *current_title){
 
 // Función para eliminar un nodo de la tabla hash y también de la lista
 void delete_hash_node(char *current_title, list_node *hash_table[], list_node **list) {
-    uint32_t hash = adler32(current_title, strlen(current_title));
-    uint32_t index = hash % tam_hash;
+    unsigned long hash = hash_modulo(current_title);
+    unsigned long index = hash;
 
     list_node *current = hash_table[index];
     list_node *prev = NULL;
@@ -151,7 +146,7 @@ void delete_hash_node(char *current_title, list_node *hash_table[], list_node **
     fclose(file);
 }
 
-void load_hash_node(){
+void load_hash_nodes(){
     char list_file[] = "notes/list.txt";
     char current_title[MAX_TITLE_LENGTH];
 
@@ -168,7 +163,7 @@ void load_hash_node(){
         // Y lo reemplaza por un caracter 
         // terminador de string
         len = strlen(current_title);
-        if(current_title[len-1] == '\n') current_title[len-1] = '\0'; // Remove newline
+        if(current_title[len-1] == '\n') current_title[len-1] = '\0'; // remueve linea nueva
         add_hash_node(current_title);
     }
 

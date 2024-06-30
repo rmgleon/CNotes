@@ -10,7 +10,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <time.h>
-#include <omp.h> //openmp for multiple thread
 
 // nuklear
 #define NK_INCLUDE_FIXED_TYPES 
@@ -53,13 +52,7 @@ struct XWindow {
     XFont *font;
     unsigned int width;
     unsigned int height;
-    Atom wm_delete_window;
-/*
-    Atom clipboard; // Atom para el portapapeles
-    Atom targets;   // Atom para los objetivos del portapapeles
-    Atom utf8_string; // Atom para UTF8_STRING
-
-*/ // no anda    
+    Atom wm_delete_window;  
 };
 
 void cleanup(XWindow *xw){
@@ -94,31 +87,8 @@ static void sleep_for(long t){
     req.tv_nsec = ms * 1000000L;
     while(-1 == nanosleep(&req, &req));
 }
-/*
-// Función para copiar texto al portapapeles
-void copy_to_clipboard(XWindow *xw, const char *text) {
-    XSetSelectionOwner(xw->dpy, xw->clipboard, xw->win, CurrentTime);
-    if (XGetSelectionOwner(xw->dpy, xw->clipboard) != xw->win) {
-        fprintf(stderr, "Failed to set clipboard owner\n");
-        return;
-    }
-    XChangeProperty(xw->dpy, xw->win, xw->clipboard, xw->utf8_string, 8,
-                    PropModeReplace, (unsigned char*)text, strlen(text));
-}
 
-// Función para pegar texto del portapapeles
-char* paste_from_clipboard(XWindow *xw) {
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems, bytes_after;
-    unsigned char *data = NULL;
-    XConvertSelection(xw->dpy, xw->clipboard, xw->utf8_string, xw->clipboard, xw->win, CurrentTime);
-    XGetWindowProperty(xw->dpy, xw->win, xw->clipboard, 0, LONG_MAX / 4, False, AnyPropertyType,
-                       &actual_type, &actual_format, &nitems, &bytes_after, &data);
-    return (char*)data;
-}
-*/ //no anda
-int edit_mode = 1;
+
 // GUI archives
 #define INCLUDE_ALL
 #define INCLUDE_STYLE
@@ -140,29 +110,29 @@ int edit_mode = 1;
 
 #ifdef INCLUDE_STYLE
 
-    #include "../src/style.c"
+    #include "../src/style.h"
 
 #endif
 
 #ifdef INCLUDE_GUI_TEXT_TITLE
 
-    #include "../src/Gui_Text_Title.c"
+    #include "../src/gui_text_title.h"
 
 #endif
 
 #ifdef INCLUDE_GUI_ARCHIVE
 
-    #include "../src/Gui_Archive.c"
+    #include "../src/gui_archive.h"
 
 #endif
 
 #ifdef INCLUDE_GUI_LAYOUT
 
-    #include "../src/Gui_Layout.c"
+    #include "../src/gui_layout.h"
 
 #endif
 
-//main
+//main, por si acaso
 int main(void){
 
     // Startup Stuff
@@ -170,7 +140,7 @@ int main(void){
     
     initialize_hash();
 
-    load_hash_node();
+    load_hash_nodes();
 
     
 
@@ -205,14 +175,9 @@ int main(void){
     XSetWMProtocols(xw.dpy, xw.win, &xw.wm_delete_window, 1);
     XGetWindowAttributes(xw.dpy, xw.win, &xw.attr);
     xw.width = (unsigned int)xw.attr.width;
-    xw.height = (unsigned int)xw.attr.height;
-  /*  
-    xw.clipboard = XInternAtom(xw.dpy, "CLIPBOARD", False);
-    xw.targets = XInternAtom(xw.dpy, "TARGETS", False);
-    xw.utf8_string = XInternAtom(xw.dpy, "UTF8_STRING", False);
-  */ // no anda  
+    xw.height = (unsigned int)xw.attr.height; 
 
-    /* GUI */
+     
     xw.font = nk_xfont_create(xw.dpy, "fixed");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
 
@@ -227,35 +192,19 @@ int main(void){
         while (XPending(xw.dpy)) {
             XNextEvent(xw.dpy, &evt);
             if (evt.type == ClientMessage) cleanup(&xw);
-            if (XFilterEvent(&evt, xw.win)) continue;
- /*           if (evt.type == KeyPress) {
-                KeySym keysym = XLookupKeysym(&evt.xkey, 0);
-                if ((evt.xkey.state & ControlMask) && keysym == XK_c) {
-                    // Copiar texto al portapapeles
-                    copy_to_clipboard(&xw, text);
-                } else if ((evt.xkey.state & ControlMask) && keysym == XK_v) {
-                    // Pegar texto del portapapeles
-                    char *clipboard_text = paste_from_clipboard(&xw);
-                    if (clipboard_text) {
-                        strncat(text, clipboard_text, sizeof(text) - text_len - 1);
-                        text_len = text_len + sizeof(clipboard_text);
-                        XFree(clipboard_text);
-                    }
-                }
-            }
-  */ // no anda              
+            if (XFilterEvent(&evt, xw.win)) continue;          
             
             nk_xlib_handle_event(xw.dpy, xw.screen, xw.win, &evt);
         }
         nk_input_end(ctx);
 
-        /* GUI */
+        // interfaz
 
         #ifdef INCLUDE_ALL
 
             layout(ctx); // Llamada a la función de diseño del menú
-            Text_title(ctx); // llama funcion de espacio de escritura de texto y titulo
-            Archive(ctx); // llama a la funcion de ventana visualizador de archivos txt
+            text_title(ctx); // llama funcion de espacio de escritura de texto y titulo
+            archive(ctx); // llama a la funcion de ventana visualizador de archivos txt
 
         #endif
 

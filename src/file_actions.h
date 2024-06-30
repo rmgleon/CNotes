@@ -7,7 +7,7 @@
 #define MAX_TEXT_LENGTH 16384 // 1024 * 16
 #define MAX_TITLE_LENGTH 105
 
-/* Function to save text to a file */
+// Guarda como .txt
 void save_text(char *text, char* title) {
     
     if (title == NULL) {

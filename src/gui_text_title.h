@@ -1,8 +1,9 @@
 int WINDOW_HEIGHT_OFFSET = 35;
+int edit_mode = 1;
 
 // ventana de texto e titulo
 
-void Text_title(struct nk_context *ctx){
+void text_title(struct nk_context *ctx){
 
     if (nk_begin(ctx, "Text Editor", nk_rect(WINDOW_WIDTH-(WINDOW_WIDTH*80/100), WINDOW_HEIGHT_OFFSET, WINDOW_WIDTH-(WINDOW_WIDTH*20/100), WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET), NK_WINDOW_BORDER
     | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE)){    
@@ -11,8 +12,7 @@ void Text_title(struct nk_context *ctx){
         nk_edit_string(ctx, NK_EDIT_FIELD, title, &title_len, sizeof(title), nk_filter_default);
 
         nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET -115, 1);  
-        nk_layout_row_push(ctx, 0); // Push 70% of the space for the text editor
-        
+        nk_layout_row_push(ctx, 0);
         
         if (edit_mode) {
 
@@ -41,11 +41,12 @@ void Text_title(struct nk_context *ctx){
             save_list_nodes(&list);
         }
     }
-
+    /*
     if (nk_button_label(ctx, "Show hash")){
 
         show_hash(hash_table);
     }
+    */
     if (nk_button_label(ctx, "Alternar")) {
 
         edit_mode = !edit_mode;

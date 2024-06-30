@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <omp.h>
 
 #define MAX_TREE_HT 256
 
-// Estructura para un nodo del árbol de Huffman
+// Estructura para un nodo del arbol de Huffman
 struct MinHeapNode {
     char data;
     unsigned freq;
@@ -19,7 +18,7 @@ struct MinHeap {
     struct MinHeapNode** array;
 };
 
-// Crear un nuevo nodo del árbol de Huffman
+// Crea un nuevo nodo del árbol de Huffman
 struct MinHeapNode* newNode(char data, unsigned freq) {
     struct MinHeapNode* temp = (struct MinHeapNode*) malloc(sizeof(struct MinHeapNode));
     temp->left = temp->right = NULL;
@@ -28,7 +27,7 @@ struct MinHeapNode* newNode(char data, unsigned freq) {
     return temp;
 }
 
-// Crear una cola de prioridad (Min Heap) de una capacidad dada
+// Crea una cola de prioridad (Min Heap) de una capacidad dada
 struct MinHeap* createMinHeap(unsigned capacity) {
     struct MinHeap* minHeap = (struct MinHeap*) malloc(sizeof(struct MinHeap));
     minHeap->size = 0;
@@ -37,14 +36,14 @@ struct MinHeap* createMinHeap(unsigned capacity) {
     return minHeap;
 }
 
-// Intercambiar dos nodos de la cola de prioridad
+// Intercambia dos nodos de la cola de prioridad
 void swapMinHeapNode(struct MinHeapNode** a, struct MinHeapNode** b) {
     struct MinHeapNode* t = *a;
     *a = *b;
     *b = t;
 }
 
-// Ordenar la cola de prioridad
+// Ordena la cola de prioridad
 void minHeapify(struct MinHeap* minHeap, int idx) {
     int smallest = idx;
     int left = 2 * idx + 1;
@@ -67,7 +66,7 @@ int isSizeOne(struct MinHeap* minHeap) {
     return (minHeap->size == 1);
 }
 
-// Extraer el nodo con la frecuencia mínima
+// Extrae el nodo con la frecuencia mínima
 struct MinHeapNode* extractMin(struct MinHeap* minHeap) {
     struct MinHeapNode* temp = minHeap->array[0];
     minHeap->array[0] = minHeap->array[minHeap->size - 1];
@@ -76,7 +75,7 @@ struct MinHeapNode* extractMin(struct MinHeap* minHeap) {
     return temp;
 }
 
-// Insertar un nodo en la cola de prioridad
+// Inserta un nodo en la cola de prioridad
 void insertMinHeap(struct MinHeap* minHeap, struct MinHeapNode* minHeapNode) {
     ++minHeap->size;
     int i = minHeap->size - 1;
@@ -88,7 +87,7 @@ void insertMinHeap(struct MinHeap* minHeap, struct MinHeapNode* minHeapNode) {
     minHeap->array[i] = minHeapNode;
 }
 
-// Construir la cola de prioridad y ordenar los nodos
+// Construye la cola de prioridad y ordena los nodos
 void buildMinHeap(struct MinHeap* minHeap) {
     int n = minHeap->size - 1;
     int i;
@@ -97,12 +96,12 @@ void buildMinHeap(struct MinHeap* minHeap) {
         minHeapify(minHeap, i);
 }
 
-// Verificar si el nodo es una hoja
+// Verifica si el nodo es una hoja
 int isLeaf(struct MinHeapNode* root) {
     return !(root->left) && !(root->right);
 }
 
-// Crear y construir la cola de prioridad para el árbol de Huffman
+// Crea y construye la cola de prioridad para el arbol de Huffman
 struct MinHeap* createAndBuildMinHeap(char data[], int freq[], int size) {
     struct MinHeap* minHeap = createMinHeap(size);
 
@@ -130,7 +129,7 @@ struct MinHeapNode* buildHuffmanTree(char data[], int freq[], int size) {
     return extractMin(minHeap);
 }
 
-// Guardar los códigos de Huffman en un array
+// Guarda los codigos de Huffman en un arreglo
 void storeCodes(struct MinHeapNode* root, int arr[], int top, char* codes[], int codeLengths[]) {
     if (root->left) {
         arr[top] = 0;
@@ -152,14 +151,14 @@ void storeCodes(struct MinHeapNode* root, int arr[], int top, char* codes[], int
     }
 }
 
-// Función principal para construir el árbol de Huffman y generar los códigos
+// Funcion principal, construye el árbol de Huffman y genera los codigos
 void HuffmanCodes(char data[], int freq[], int size, char* codes[], int codeLengths[]) {
     struct MinHeapNode* root = buildHuffmanTree(data, freq, size);
     int arr[MAX_TREE_HT], top = 0;
     storeCodes(root, arr, top, codes, codeLengths);
 }
 
-// Función para contar la frecuencia de los caracteres en un texto
+// Cuenta la frecuencia de los caracteres en el texto
 void countFrequency(const char* text, int freq[]) {
     // Inicializar el array de frecuencias a 0
     for (int i = 0; i < 256; ++i) {
@@ -173,7 +172,7 @@ void countFrequency(const char* text, int freq[]) {
 }
 
 
-// Función para escribir la tabla de códigos en el archivo comprimido
+// Escribe la tabla de codigos en el archivo comprimido
 void writeCodesTable(FILE *file, char* codes[], int codeLengths[]) {
     for (int i = 0; i < 256; i++) {
         if (codeLengths[i] > 0) {
@@ -187,7 +186,7 @@ void writeCodesTable(FILE *file, char* codes[], int codeLengths[]) {
     fputc('\0', file);  // Fin de la tabla de códigos
 }
 
-// Función para leer la tabla de códigos del archivo comprimido
+// Lee la tabla de codigos del archivo comprimido
 void readCodesTable(FILE *file, struct MinHeapNode* root) {
     unsigned char ch;
     while ((ch = fgetc(file)) != '\0') {
@@ -211,7 +210,7 @@ void readCodesTable(FILE *file, struct MinHeapNode* root) {
     }
 }
 
-// Función para comprimir un buffer de texto y guardarlo en un archivo
+// Comprime un buffer de texto y lo guarda en un archivo .hff
 void compressBuffer(const char* text, const char* title) {
     char outputFilename[256];
     snprintf(outputFilename, sizeof(outputFilename), "notes/%s.hff", title);
@@ -271,7 +270,8 @@ void compressBuffer(const char* text, const char* title) {
     fclose(outputFile);
 }
 
-// Función para descomprimir un archivo y llenar un buffer de texto
+// Toma un buffer de texto y un titulo, devuelve el buffer con el
+// contenido descomprimido
 int decompressBuffer(char* text, const char* title) {
     char inputFilename[256];
     snprintf(inputFilename, sizeof(inputFilename), "notes/%s.hff", title);
