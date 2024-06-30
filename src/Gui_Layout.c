@@ -15,12 +15,12 @@ void layout(struct nk_context *ctx) {
                 nk_layout_row_dynamic(ctx, 20, 1);
 
                 // Definir elementos del menú
-                if (nk_menu_item_label(ctx, "New", NK_TEXT_LEFT)) {
-                    // Acción para "New"
-                }
-                if (nk_menu_item_label(ctx, "Open", NK_TEXT_LEFT)) {
+              //  if (nk_menu_item_label(ctx, "New", NK_TEXT_LEFT)) {
+              //      // Acción para "New"
+              //  }
+                //if (nk_menu_item_label(ctx, "Open", NK_TEXT_LEFT)) {
                     // Acción para "Open"
-                }
+               // }
                 if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {       
                     strcpy(title_save_buf, title);
                     compressBuffer(text, title_save_buf);
@@ -32,7 +32,7 @@ void layout(struct nk_context *ctx) {
                 // Terminar el menú "File"
                 nk_menu_end(ctx);
             }
-            
+/*
             // Comenzar el menú "Search"
             if (nk_menu_begin_label(ctx, "Search  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
@@ -52,7 +52,7 @@ void layout(struct nk_context *ctx) {
                 // Terminar el menú "Search"
                 nk_menu_end(ctx);
             }
-
+*/
               
             // Comenzar el menú "THEMEs"
             if (nk_menu_begin_label(ctx, "Themes  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
@@ -93,7 +93,7 @@ void layout(struct nk_context *ctx) {
                 // Terminar el menú "THEMES"
                 nk_menu_end(ctx);
             }
-
+/*
             // Comenzar el menú "Herramientas"
             if (nk_menu_begin_label(ctx, "Tools  ", NK_TEXT_LEFT, nk_vec2(200, 200))) {
                 // Definir una fila dinámica de 25 de altura con 1 elemento por fila
@@ -113,6 +113,7 @@ void layout(struct nk_context *ctx) {
                 // Terminar el menú "Herramientas"
                 nk_menu_end(ctx);
             }
+*/   // no se desarrollo
         }
         // Terminar la barra de menú
         nk_menubar_end(ctx);

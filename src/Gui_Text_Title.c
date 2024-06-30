@@ -8,7 +8,7 @@ void Text_title(struct nk_context *ctx){
     | NK_WINDOW_MOVABLE | NK_WINDOW_TITLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE)){    
                 
         nk_layout_row_dynamic(ctx, 25, 1);
-        nk_edit_string(ctx, NK_EDIT_BOX, title, &title_len, sizeof(title), nk_filter_default);
+        nk_edit_string(ctx, NK_EDIT_FIELD, title, &title_len, sizeof(title), nk_filter_default);
 
         nk_layout_row_begin(ctx, NK_DYNAMIC,WINDOW_HEIGHT - WINDOW_HEIGHT_OFFSET -115, 1);  
         nk_layout_row_push(ctx, 0); // Push 70% of the space for the text editor
