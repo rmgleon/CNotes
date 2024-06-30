@@ -9,23 +9,36 @@ void Archive(struct nk_context *ctx){
 
         if (nk_group_begin(ctx, "Archives", NK_WINDOW_BORDER)) {
 
-            int i = 0;
-            char buffer[64];
+            // Cuadro de texto para búsqueda
+            static char search_buffer[256] = "";
+            nk_layout_row_dynamic(ctx, 25, 1);
+            nk_label(ctx, "Buscar:", NK_TEXT_LEFT);
+            nk_edit_string_zero_terminated(ctx, NK_EDIT_FIELD, search_buffer, sizeof(search_buffer), nk_filter_default);
 
-            nk_layout_row_dynamic(ctx, 0, 2);
+            // Recorrer la lista y mostrar los elementos filtrados
+            list_node *aux = list;
 
-            for (i = 0; i < 3; ++i) {
+            while(aux != NULL) {
 
-                sprintf(buffer, "%s", "asdasd.txt");
+                // Verificar si el título actual contiene el texto de búsqueda
+                if (strstr(aux->titulo, search_buffer) != NULL) {
 
-                if(nk_button_label(ctx, buffer)){
+                    if(nk_button_label(ctx, aux->titulo)){ // Al hacer click llama a la funcion para abrir el texto
+                        strcpy(title, aux->titulo);
+                        title_len = strlen(title);
 
-                    load_text(buffer);
+                        if(decompressBuffer(text, aux->titulo) == 0){
+                            delete_hash_node(aux->titulo, hash_table, &list);
+                        }
+
+                        text_len = strlen(text);
+                    }       
                 }
-
-            }nk_group_end(ctx);
-
-        }nk_layout_row_end(ctx);
+                        aux = aux->sig;
+            }
+            nk_group_end(ctx);
+        }
+        nk_layout_row_end(ctx);
 
     } nk_end(ctx);
 

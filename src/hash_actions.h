@@ -1,6 +1,3 @@
-#ifndef HASH_ACTIONS_H
-#define HASH_ACTIONS_H
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,8 +6,12 @@
 #define MOD_ADLER 65521
 #define tam_hash 1000
 
+list_node* list=NULL;
+
+list_node *hash_table[tam_hash];
+
 // Inicializa tabla hash en NULL
-void initialize_hash(list_node *hash_table[]){
+void initialize_hash(){
 	for(int i=0; i<tam_hash; i++){
 		hash_table[i] = NULL;
 	}
@@ -45,10 +46,10 @@ int title_exists(const char *title, list_node *hash_table[]) {
 }
 
 
-void add_hash_node(char *current_title, list_node *hash_table[], list_node **list){
+void add_hash_node(char *current_title){
 
     // Comprobar si el título ya existe
-    if (title_exists(current_title, hash_table)) {
+    if (title_exists(current_title,hash_table)) {
         return; // No agregar si el título ya existe
     }
 
@@ -73,8 +74,8 @@ void add_hash_node(char *current_title, list_node *hash_table[], list_node **lis
         return;
     }
     list_node_copy->titulo = strdup(current_title);
-    list_node_copy->sig = *list;
-    *list = list_node_copy;
+    list_node_copy->sig = list;
+    list = list_node_copy;
     
 }
 
@@ -150,7 +151,7 @@ void delete_hash_node(char *current_title, list_node *hash_table[], list_node **
     fclose(file);
 }
 
-void load_hash_node(list_node** hash_table, list_node **list){
+void load_hash_node(){
     char list_file[] = "notes/list.txt";
     char current_title[MAX_TITLE_LENGTH];
 
@@ -168,7 +169,7 @@ void load_hash_node(list_node** hash_table, list_node **list){
         // terminador de string
         len = strlen(current_title);
         if(current_title[len-1] == '\n') current_title[len-1] = '\0'; // Remove newline
-        add_hash_node(current_title, hash_table, list);
+        add_hash_node(current_title);
     }
 
     fclose(file);
@@ -186,5 +187,3 @@ void show_hash(list_node *hash_table[]) {
         }
     }
 }
-
-#endif

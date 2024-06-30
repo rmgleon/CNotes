@@ -23,7 +23,7 @@ void layout(struct nk_context *ctx) {
                 }
                 if (nk_menu_item_label(ctx, "Save", NK_TEXT_LEFT)) {       
                     strcpy(title_save_buf, title);
-                    save_text(text, title_save_buf);
+                    compressBuffer(text, title_save_buf);
                 }
                 if (nk_menu_item_label(ctx, "Exit", NK_TEXT_LEFT)) {
                     // Acción para "Exit"

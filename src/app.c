@@ -10,9 +10,10 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <time.h>
-#include <omp.h> //openmp
+#include <omp.h> //openmp for multiple thread
 
-#define NK_INCLUDE_FIXED_TYPES
+// nuklear
+#define NK_INCLUDE_FIXED_TYPES 
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
 #define NK_INCLUDE_DEFAULT_ALLOCATOR
@@ -20,13 +21,24 @@
 #define NK_XLIB_IMPLEMENTATION
 #include "../nuklear/nuklear.h"
 #include "../nuklear/nuklear_xlib.h"
+
+// lib personal
 #include "../src/file_actions.h"
+#include "../src/list_actions.h"
+#include "../src/hash_actions.h"
+#include "../src/huffman.h"
 
 #define DTIME           35
 #define WINDOW_WIDTH    960
 #define WINDOW_HEIGHT   600
 
 // Variables globales
+
+char text[1024 * 16] = {0}; /* Buffer for text input */
+char title[100] = {0}; // Titulo
+int text_len = 0;
+int title_len = 0;
+char title_save_buf[100];
 
 typedef struct XWindow XWindow;
 struct XWindow {
@@ -42,6 +54,12 @@ struct XWindow {
     unsigned int width;
     unsigned int height;
     Atom wm_delete_window;
+/*
+    Atom clipboard; // Atom para el portapapeles
+    Atom targets;   // Atom para los objetivos del portapapeles
+    Atom utf8_string; // Atom para UTF8_STRING
+
+*/ // no anda    
 };
 
 void cleanup(XWindow *xw){
@@ -76,14 +94,39 @@ static void sleep_for(long t){
     req.tv_nsec = ms * 1000000L;
     while(-1 == nanosleep(&req, &req));
 }
+/*
+// Función para copiar texto al portapapeles
+void copy_to_clipboard(XWindow *xw, const char *text) {
+    XSetSelectionOwner(xw->dpy, xw->clipboard, xw->win, CurrentTime);
+    if (XGetSelectionOwner(xw->dpy, xw->clipboard) != xw->win) {
+        fprintf(stderr, "Failed to set clipboard owner\n");
+        return;
+    }
+    XChangeProperty(xw->dpy, xw->win, xw->clipboard, xw->utf8_string, 8,
+                    PropModeReplace, (unsigned char*)text, strlen(text));
+}
 
+// Función para pegar texto del portapapeles
+char* paste_from_clipboard(XWindow *xw) {
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems, bytes_after;
+    unsigned char *data = NULL;
+    XConvertSelection(xw->dpy, xw->clipboard, xw->utf8_string, xw->clipboard, xw->win, CurrentTime);
+    XGetWindowProperty(xw->dpy, xw->win, xw->clipboard, 0, LONG_MAX / 4, False, AnyPropertyType,
+                       &actual_type, &actual_format, &nitems, &bytes_after, &data);
+    return (char*)data;
+}
+*/ //no anda
+int edit_mode = 1;
 // GUI archives
 #define INCLUDE_ALL
 #define INCLUDE_STYLE
 #define INCLUDE_GUI_TEXT_TITLE
 #define INCLUDE_GUI_ARCHIVE
 #define INCLUDE_GUI_LAYOUT
-#define INCLUDE_NODE_EDITOR 
+
+
 
 #ifdef INCLUDE_ALL
 
@@ -91,7 +134,7 @@ static void sleep_for(long t){
     #define INCLUDE_GUI_TEXT_TITLE
     #define INCLUDE_GUI_ARCHIVE
     #define INCLUDE_GUI_LAYOUT
-    #define INCLUDE_NODE_EDITOR
+
 
 #endif
 
@@ -119,14 +162,18 @@ static void sleep_for(long t){
 
 #endif
 
-#ifdef INCLUDE_NODE_EDITOR
-
-  #include "../src/Gui_Connector.c"
-  
-#endif
-
 //main
 int main(void){
+
+    // Startup Stuff
+    system("mkdir notes");
+    
+    initialize_hash();
+
+    load_hash_node();
+
+    
+
     long dt;
     long started;
     int running = 1;
@@ -159,15 +206,17 @@ int main(void){
     XGetWindowAttributes(xw.dpy, xw.win, &xw.attr);
     xw.width = (unsigned int)xw.attr.width;
     xw.height = (unsigned int)xw.attr.height;
-
+  /*  
+    xw.clipboard = XInternAtom(xw.dpy, "CLIPBOARD", False);
+    xw.targets = XInternAtom(xw.dpy, "TARGETS", False);
+    xw.utf8_string = XInternAtom(xw.dpy, "UTF8_STRING", False);
+  */ // no anda  
 
     /* GUI */
     xw.font = nk_xfont_create(xw.dpy, "fixed");
     ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
 
-    char title_placeholder[]={"Titulo:"};
-    strcpy(title, title_placeholder);
-    title_len=sizeof(title_placeholder);
+    set_style(ctx, THEME_DRACULA);
 
     while (running)
     {
@@ -179,6 +228,23 @@ int main(void){
             XNextEvent(xw.dpy, &evt);
             if (evt.type == ClientMessage) cleanup(&xw);
             if (XFilterEvent(&evt, xw.win)) continue;
+ /*           if (evt.type == KeyPress) {
+                KeySym keysym = XLookupKeysym(&evt.xkey, 0);
+                if ((evt.xkey.state & ControlMask) && keysym == XK_c) {
+                    // Copiar texto al portapapeles
+                    copy_to_clipboard(&xw, text);
+                } else if ((evt.xkey.state & ControlMask) && keysym == XK_v) {
+                    // Pegar texto del portapapeles
+                    char *clipboard_text = paste_from_clipboard(&xw);
+                    if (clipboard_text) {
+                        strncat(text, clipboard_text, sizeof(text) - text_len - 1);
+                        text_len = text_len + sizeof(clipboard_text);
+                        XFree(clipboard_text);
+                    }
+                }
+            }
+  */ // no anda              
+            
             nk_xlib_handle_event(xw.dpy, xw.screen, xw.win, &evt);
         }
         nk_input_end(ctx);
@@ -190,7 +256,6 @@ int main(void){
             layout(ctx); // Llamada a la función de diseño del menú
             Text_title(ctx); // llama funcion de espacio de escritura de texto y titulo
             Archive(ctx); // llama a la funcion de ventana visualizador de archivos txt
-            node_editor(ctx);// llama elazador de notas
 
         #endif
 

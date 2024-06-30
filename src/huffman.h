@@ -159,39 +159,19 @@ void HuffmanCodes(char data[], int freq[], int size, char* codes[], int codeLeng
     storeCodes(root, arr, top, codes, codeLengths);
 }
 
-// Función para leer un archivo de texto y contar la frecuencia de los caracteres
-void countFrequencyParallel(const char* filename, int freq[]) {
-    FILE *file = fopen(filename, "r");
-    if (!file) {
-        fprintf(stderr, "Error abriendo el archivo %s\n", filename);
-        exit(EXIT_FAILURE);
-    }
-
-    // Inicializar el array de frecuencias a cero
-    #pragma omp parallel for
+// Función para contar la frecuencia de los caracteres en un texto
+void countFrequency(const char* text, int freq[]) {
+    // Inicializar el array de frecuencias a 0
     for (int i = 0; i < 256; ++i) {
         freq[i] = 0;
     }
 
-    unsigned char ch;
-    #pragma omp parallel
-    {
-        int local_freq[256] = {0};  // Cada hilo tiene su propio array de frecuencias
-        while (fscanf(file, "%c", &ch) != EOF) {
-            local_freq[ch]++;
-        }
-
-        // Combinar las frecuencias locales en la frecuencia global
-        #pragma omp critical
-        {
-            for (int i = 0; i < 256; ++i) {
-                freq[i] += local_freq[i];
-            }
-        }
+    // Contar la frecuencia de cada carácter en el texto
+    for (int i = 0; text[i] != '\0'; ++i) {
+        freq[(unsigned char)text[i]]++;
     }
-
-    fclose(file);
 }
+
 
 // Función para escribir la tabla de códigos en el archivo comprimido
 void writeCodesTable(FILE *file, char* codes[], int codeLengths[]) {
@@ -231,94 +211,13 @@ void readCodesTable(FILE *file, struct MinHeapNode* root) {
     }
 }
 
-// Función para comprimir un archivo usando Huffman
-void compressFile(const char* inputFilename, const char* outputFilename, char* codes[], int codeLengths[]) {
-    FILE *inputFile = fopen(inputFilename, "r");
-    FILE *outputFile = fopen(outputFilename, "wb");
-
-    if (!inputFile || !outputFile) {
-        fprintf(stderr, "Error abriendo archivos.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Escribir la tabla de códigos en el archivo comprimido
-    writeCodesTable(outputFile, codes, codeLengths);
-
-    unsigned char ch;
-    int buffer = 0, bufferSize = 0;
-
-    while (fscanf(inputFile, "%c", &ch) != EOF) {
-        char* code = codes[ch];
-        for (int i = 0; i < codeLengths[ch]; i++) {
-            buffer = (buffer << 1) | (code[i] - '0');
-            bufferSize++;
-
-            if (bufferSize == 8) {
-                fputc(buffer, outputFile);
-                bufferSize = 0;
-                buffer = 0;
-            }
-        }
-    }
-
-    if (bufferSize > 0) {
-        buffer = buffer << (8 - bufferSize);
-        fputc(buffer, outputFile);
-    }
-
-    fclose(inputFile);
-    fclose(outputFile);
-}
-
-// Función para descomprimir un archivo usando Huffman
-void decompressFile(const char* inputFilename, const char* outputFilename, struct MinHeapNode* root) {
-    FILE *inputFile = fopen(inputFilename, "rb");
-    FILE *outputFile = fopen(outputFilename, "w");
-
-    if (!inputFile || !outputFile) {
-        fprintf(stderr, "Error abriendo archivos.\n");
-        exit(EXIT_FAILURE);
-    }
-
-    // Leer la tabla de códigos del archivo comprimido y reconstruir el árbol de Huffman
-    readCodesTable(inputFile, root);
-
-    struct MinHeapNode* currentNode = root;
-    unsigned char buffer;
-    int bit;
-
-    while (fread(&buffer, 1, 1, inputFile) == 1) {
-        for (int i = 7; i >= 0; i--) {
-            bit = (buffer >> i) & 1;
-            if (bit == 0) {
-                currentNode = currentNode->left;
-            } else {
-                currentNode = currentNode->right;
-            }
-
-            if (isLeaf(currentNode)) {
-                fputc(currentNode->data, outputFile);
-                currentNode = root;
-            }
-        }
-    }
-
-    fclose(inputFile);
-    fclose(outputFile);
-}
-
-int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        fprintf(stderr, "Uso: %s <comprimir|descomprimir> <archivo_entrada> <archivo_salida>\n", argv[0]);
-        return 1;
-    }
-
-    const char* operation = argv[1];
-    const char* inputFilename = argv[2];
-    const char* outputFilename = argv[3];
+// Función para comprimir un buffer de texto y guardarlo en un archivo
+void compressBuffer(const char* text, const char* title) {
+    char outputFilename[256];
+    snprintf(outputFilename, sizeof(outputFilename), "notes/%s.hff", title);
 
     int freq[256] = {0};
-    countFrequencyParallel(inputFilename, freq);
+    countFrequency(text, freq);
 
     char data[256];
     int nonZeroFreq[256];
@@ -335,16 +234,79 @@ int main(int argc, char *argv[]) {
     char* codes[256];
     int codeLengths[256] = {0};
 
-    if (strcmp(operation, "comprimir") == 0) {
-        HuffmanCodes(data, nonZeroFreq, size, codes, codeLengths);
-        compressFile(inputFilename, outputFilename, codes, codeLengths);
-    } else if (strcmp(operation, "descomprimir") == 0) {
-        struct MinHeapNode* root = newNode('$', 0);
-        decompressFile(inputFilename, outputFilename, root);
-    } else {
-        fprintf(stderr, "Operación desconocida: %s\n", operation);
-        return 1;
+    HuffmanCodes(data, nonZeroFreq, size, codes, codeLengths);
+
+    FILE *outputFile = fopen(outputFilename, "wb");
+    if (!outputFile) {
+        fprintf(stderr, "Error abriendo archivo %s.\n", outputFilename);
+        exit(EXIT_FAILURE);
     }
 
-    return 0;
+    // Escribir la tabla de códigos en el archivo comprimido
+    writeCodesTable(outputFile, codes, codeLengths);
+
+    unsigned char ch;
+    int buffer = 0, bufferSize = 0;
+
+    for (int i = 0; text[i] != '\0'; ++i) {
+        ch = text[i];
+        char* code = codes[ch];
+        for (int j = 0; j < codeLengths[ch]; j++) {
+            buffer = (buffer << 1) | (code[j] - '0');
+            bufferSize++;
+
+            if (bufferSize == 8) {
+                fputc(buffer, outputFile);
+                bufferSize = 0;
+                buffer = 0;
+            }
+        }
+    }
+
+    if (bufferSize > 0) {
+        buffer = buffer << (8 - bufferSize);
+        fputc(buffer, outputFile);
+    }
+
+    fclose(outputFile);
+}
+
+// Función para descomprimir un archivo y llenar un buffer de texto
+int decompressBuffer(char* text, const char* title) {
+    char inputFilename[256];
+    snprintf(inputFilename, sizeof(inputFilename), "notes/%s.hff", title);
+
+    FILE *inputFile = fopen(inputFilename, "rb");
+    if (!inputFile) {
+        fprintf(stderr, "Error abriendo archivo %s.\n", inputFilename);
+        return 0;
+    }
+
+    struct MinHeapNode* root = newNode('$', 0);
+    readCodesTable(inputFile, root);
+
+    struct MinHeapNode* currentNode = root;
+    unsigned char buffer;
+    int bit;
+    int pos = 0;
+
+    while (fread(&buffer, 1, 1, inputFile) == 1) {
+        for (int i = 7; i >= 0; i--) {
+            bit = (buffer >> i) & 1;
+            if (bit == 0) {
+                currentNode = currentNode->left;
+            } else {
+                currentNode = currentNode->right;
+            }
+
+            if (isLeaf(currentNode)) {
+                text[pos++] = currentNode->data;
+                currentNode = root;
+            }
+        }
+    }
+
+    text[pos] = '\0';  // Final del texto descomprimido
+    fclose(inputFile);
+    return 1;
 }

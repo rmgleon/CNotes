@@ -17,6 +17,7 @@ typedef struct list_node{
 void add_list_node(char* title, list_node** list){
     // buscar si existe con hash, todavia no se implemento
     if(title==NULL)return;
+    
     list_node* aux=(list_node*)malloc(sizeof(list_node));
     if (!aux) {
         perror("Error al asignar memoria\n");
