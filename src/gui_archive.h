@@ -22,11 +22,9 @@ void archive(struct nk_context *ctx){
 
                 // Verificar si el título actual contiene el texto de búsqueda
                 if (strstr(aux->titulo, search_buffer) != NULL) {
-
                     if(nk_button_label(ctx, aux->titulo)){ // Al hacer click llama a la funcion para abrir el texto
                         strcpy(title, aux->titulo);
                         title_len = strlen(title);
-
                         if(decompressBuffer(text, aux->titulo) == 0){
                             delete_hash_node(aux->titulo, hash_table, &list);
                         }

@@ -44,5 +44,12 @@ void text_title(struct nk_context *ctx){
     if (nk_button_label(ctx, "Alternar")) {
         edit_mode = !edit_mode;
     }
+
+    if (nk_button_label(ctx, "Borrar")) {
+        delete_hash_node(title, hash_table, &list);
+        char command[MAX_TITLE_LENGTH+14]; //14 para el resto del comando
+        sprintf(command, "rm notes/%s.hff", title);
+        system(command);
+    }
     nk_end(ctx);
 }

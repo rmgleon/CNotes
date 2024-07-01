@@ -278,7 +278,7 @@ int decompressBuffer(char* text, const char* title) {
 
     FILE *inputFile = fopen(inputFilename, "rb");
     if (!inputFile) {
-        fprintf(stderr, "Error abriendo archivo %s.\n", inputFilename);
+        printf("Error abriendo archivo %s.\n", inputFilename);
         return 0;
     }
 
